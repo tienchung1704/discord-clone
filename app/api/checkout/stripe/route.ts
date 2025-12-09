@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const getStripe = () => {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) {
+    throw new Error("STRIPE_SECRET_KEY is not defined");
+  }
+  return new Stripe(key);
+};
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,6 +17,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing plan or userId" }, { status: 400 });
     }
 
+    const stripe = getStripe();
+    
     // Tạo Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
       line_items: [
