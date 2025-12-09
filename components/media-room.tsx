@@ -48,6 +48,14 @@ const MediaRoom = ({
 
   // Emit voice channel join/leave events
   useEffect(() => {
+    console.log("[MediaRoom] Effect triggered:", { 
+      hasSocket: !!socket, 
+      serverId, 
+      profileId, 
+      hasToken: !!token,
+      socketConnected: socket?.connected 
+    });
+    
     if (!socket || !serverId || !profileId || !token) return;
 
     const participant = {
@@ -57,13 +65,26 @@ const MediaRoom = ({
       odChannelId: chatId,
     };
 
-    socket.emit("voice:join-channel", {
-      serverId,
-      channelId: chatId,
-      participant,
-    });
+    const joinChannel = () => {
+      console.log("[MediaRoom] Emitting voice:join-channel", { serverId, chatId, participant });
+      socket.emit("voice:join-channel", {
+        serverId,
+        channelId: chatId,
+        participant,
+      });
+    };
+
+    // Join when socket is connected
+    if (socket.connected) {
+      joinChannel();
+    } else {
+      console.log("[MediaRoom] Socket not connected, waiting...");
+      socket.on("connect", joinChannel);
+    }
 
     return () => {
+      console.log("[MediaRoom] Cleanup - leaving channel");
+      socket.off("connect", joinChannel);
       socket.emit("voice:leave-channel", {
         serverId,
         channelId: chatId,
