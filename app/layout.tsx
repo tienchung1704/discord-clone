@@ -5,7 +5,6 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { cn } from "@/lib/utils";
 import { ModalProvider } from "@/components/providers/modal-provider";
 import { SocketProvider } from "@/components/providers/socket-provider";
-import { PresenceProvider } from "@/components/providers/presence-provider";
 import { VoiceProvider } from "@/components/providers/voice-provider";
 import QueryProvider from "@/components/providers/query-provider";
 import "react-toastify/dist/ReactToastify.css";
@@ -28,7 +27,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={cn(openSans.className, "bg-white dark:bg-[#313338]")}>
+        <body className={cn(openSans.className, "bg-white dark:bg-[#313338]")} suppressHydrationWarning>
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
@@ -37,13 +36,11 @@ export default function RootLayout({
           >
             <SocketProvider>
               <VoiceProvider>
-                <PresenceProvider>
-                  <ModalProvider />
-                  <QueryProvider>
-                    <ToastContainer position="top-right" autoClose={3000} />
-                    {children}
-                  </QueryProvider>
-                </PresenceProvider>
+                <ModalProvider />
+                <QueryProvider>
+                  <ToastContainer position="top-right" autoClose={3000} />
+                  {children}
+                </QueryProvider>
               </VoiceProvider>
             </SocketProvider>
           </ThemeProvider>

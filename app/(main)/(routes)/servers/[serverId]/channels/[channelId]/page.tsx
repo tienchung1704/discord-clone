@@ -9,14 +9,14 @@ import { ChannelType } from "@/lib/generated/prisma";
 import MediaRoom from "@/components/media-room";
 import { RedirectToSignIn } from "@clerk/nextjs";
 interface ChannelIdPageProps {
-  params: {
+  params: Promise<{
     serverId: string;
     channelId: string;
-  };
+  }>;
 }
 
-export default async function ChannelIdPage(props: ChannelIdPageProps) {
-  const { channelId, serverId } = await props.params; 
+export default async function ChannelIdPage({ params }: ChannelIdPageProps) {
+  const { channelId, serverId } = await params; 
   const profile = await currentProfile();
 
   if (!profile) return <RedirectToSignIn />

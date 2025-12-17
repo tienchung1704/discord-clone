@@ -39,13 +39,17 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "Server ID is required" }, { status: 400 });
+    }
+
     const server = await db.server.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         members: {
           include: { profile: true },

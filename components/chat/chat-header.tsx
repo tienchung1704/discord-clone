@@ -1,14 +1,12 @@
-import { Hash, Menu, Mic, ShieldAlert, ShieldCheck, Video } from "lucide-react";
+import { Hash, Mic, ShieldAlert, ShieldCheck, Video } from "lucide-react";
 import { MobileToggle } from "@/components/mobile-toggle/mobile-toggle";
 import { UserAvatar } from "@/components/ui/user-avatar";
-import { SocketIndicator } from "@/components/socket-indicator";
 import { ChatVideoButton } from "./chat-video-button";
 import { db } from "@/lib/db";
 import { ChannelType, MemberRole } from "@/lib/generated/prisma/client";
 import { ServerSearch } from "@/components/server/server-search";
 import { currentProfile } from "@/lib/current-profile";
 import { redirect } from "next/navigation";
-import { ModeToggle } from "@/components/mode-toggle";
 interface ChatHeaderProps {
     serverId?: string,
     name: string,
@@ -76,8 +74,6 @@ export const ChatHeader = async ({ serverId, name, type, imgUrl }: ChatHeaderPro
                 {type === "conversation" && (
                     <ChatVideoButton />
                 )}
-                <ModeToggle />
-                <SocketIndicator />
 
                 {server && (
                     <div className="w-53 absolute right-4">

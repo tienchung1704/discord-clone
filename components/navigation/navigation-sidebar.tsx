@@ -7,11 +7,12 @@ import { ScrollArea } from "../ui/scroll-area";
 import { NavigationItem } from "./navigation-item";
 import { ModeToggle } from "../mode-toggle";
 import { UserButton } from "@clerk/nextjs";
+import { StatusSelector } from "./status-selector";
 
 export const NanigationSideBar = async () => {
     const profile = await currentProfile();
     if (!profile) {
-        return redirect("/"); // or handle the case where no profile is found
+        return redirect("/");
     }
     const servers = await db.server.findMany({
         where: { 
@@ -43,11 +44,13 @@ export const NanigationSideBar = async () => {
             <Separator 
                 className="h-[2px] bg-zinc-300 dark:bg-zinc-700 rounded-md w-10 mx-auto my-3"
             />
-            <div className="flex items-center justify-center">
+            <div className="flex flex-col items-center gap-y-3 pb-1">
+                <ModeToggle />
+                <StatusSelector />
                 <UserButton 
                     appearance={{
                         elements:{
-                            avatarBox: "h-[48px] w-[48px]",
+                            avatarBox: "h-[40px] w-[40px]",
                         }
                     }}
                 />

@@ -18,23 +18,12 @@ const nextConfig = {
     ],
   },
 
-  webpack: (config, { isServer }) => {
-    config.externals.push({
+  // Turbopack config (Next.js 16 default)
+  turbopack: {
+    resolveAlias: {
       "utf-8-validate": "commonjs utf-8-validate",
       bufferutil: "commonjs bufferutil",
-    });
-    
-    // Tối ưu bundle size
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-      };
-    }
-    
-    return config;
+    },
   },
   
   images: {
@@ -51,11 +40,12 @@ const nextConfig = {
     // Cache images lâu hơn
     minimumCacheTTL: 60 * 60 * 24, // 24 hours
   },
+  
   logging: {
-  fetches: {
-    fullUrl: false,
+    fetches: {
+      fullUrl: false,
+    },
   },
-},
 
   // Tối ưu headers
   poweredByHeader: false,

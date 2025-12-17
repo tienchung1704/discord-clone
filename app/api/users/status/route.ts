@@ -2,6 +2,21 @@ import { currentProfile } from "@/lib/current-profile";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 
+export async function GET() {
+  try {
+    const profile = await currentProfile();
+    
+    if (!profile) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    return NextResponse.json({ status: profile.status });
+  } catch (error) {
+    console.error("[USER_STATUS_GET]", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+
 export async function PATCH(req: Request) {
   try {
     const profile = await currentProfile();

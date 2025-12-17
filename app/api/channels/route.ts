@@ -50,13 +50,17 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(
-  req: Request,
-  { params }: { params: { channelId: string } }
-) {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const channelId = searchParams.get("channelId");
+
+    if (!channelId) {
+      return new NextResponse("Channel ID is Missing", { status: 400 });
+    }
+
     const members = await db.channelMember.findMany({
-      where: { channelId: params.channelId },
+      where: { channelId },
       include: {
         member: { include: { profile: true } },
       },

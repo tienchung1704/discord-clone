@@ -5,9 +5,10 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 export async function DELETE(
   req: Request,
-  { params }: { params: { channelId: string } }
+  { params }: { params: Promise<{ channelId: string }> }
 ) {
   try {
+    const { channelId } = await params;
     const profile = await currentProfile();
     const { searchParams } = new URL(req.url);
     const serverId = searchParams.get("serverId");
@@ -19,7 +20,7 @@ export async function DELETE(
       return new NextResponse("Sever ID Missing", { status: 401 });
     }
 
-    if (!params.channelId) {
+    if (!channelId) {
       return new NextResponse("Channel Id Missing", { status: 400 });
     }
 
@@ -38,7 +39,7 @@ export async function DELETE(
       data: {
         channels: {
           delete: {
-            id: params.channelId,
+            id: channelId,
             name: {
                not: "general",
             }
@@ -54,14 +55,15 @@ export async function DELETE(
 }
 export async function PATCH(
   req: Request,
-  { params }: { params: { channelId: string } }
+  { params }: { params: Promise<{ channelId: string }> }
 ) {
   try {
+    const { channelId } = await params;
     const profile = await currentProfile();
     const { name, type } = await req.json();
     const { searchParams } = new URL(req.url);
 
-    const serverId = await searchParams.get("serverId");
+    const serverId = searchParams.get("serverId");
 
     if (!profile) {
       return new NextResponse("Unauthorized", { status: 401 });
@@ -71,7 +73,7 @@ export async function PATCH(
       return new NextResponse("Server ID missing", { status: 400 });
     }
 
-    if (!params.channelId) {
+    if (!channelId) {
       return new NextResponse("Channel ID missing", { status: 400 });
     }
 
@@ -95,7 +97,7 @@ export async function PATCH(
         channels: {
           update: {
             where: {
-              id: params.channelId,
+              id: channelId,
               NOT: {
                 name: "general",
               },

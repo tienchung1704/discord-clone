@@ -32,12 +32,6 @@ const ioHandler = (req: NextApiRequest, res: NextApiResponseServerIO) => {
       const voiceChannels: Record<string, Record<string, any[]>> = {};
 
       io.on("connection", (socket) => {
-        socket.on("ping-check", (callback: () => void) => {
-          if (typeof callback === "function") {
-            callback();
-          }
-        });
-
         // Voice channel events
         socket.on("voice:join-server", (serverId: string) => {
           socket.join(`voice:${serverId}`);

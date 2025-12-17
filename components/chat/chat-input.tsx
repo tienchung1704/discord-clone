@@ -25,6 +25,11 @@ const PERSPECTIVE_API_KEY = process.env.NEXT_PUBLIC_PERSPECTIVE_API_KEY;
 
 // Check toxic in background - không block gửi tin nhắn
 const checkToxicAsync = async (text: string): Promise<{ toxicity: number; spam: number }> => {
+  // Skip nếu không có API key hoặc text quá ngắn
+  if (!PERSPECTIVE_API_KEY || text.trim().length < 3) {
+    return { toxicity: 0, spam: 0 };
+  }
+
   try {
     const response = await axios.post(
       `https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=${PERSPECTIVE_API_KEY}`,
@@ -36,15 +41,15 @@ const checkToxicAsync = async (text: string): Promise<{ toxicity: number; spam: 
           SPAM: {},
         },
       },
-      { timeout: 3000 } // Timeout 3s
+      { timeout: 3000 }
     );
 
     const toxicity = response.data.attributeScores?.TOXICITY?.summaryScore?.value || 0;
     const spam = response.data.attributeScores?.SPAM?.summaryScore?.value || 0;
 
     return { toxicity, spam };
-  } catch (err) {
-    console.error("Perspective API error:", err);
+  } catch {
+    // Silently fail - không log error để tránh spam console
     return { toxicity: 0, spam: 0 };
   }
 };
