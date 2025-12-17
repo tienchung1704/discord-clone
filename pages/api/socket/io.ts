@@ -43,17 +43,22 @@ const ioHandler = (req: NextApiRequest, res: NextApiResponseServerIO) => {
       io.on("connection", (socket) => {
         // Voice channel events
         socket.on("voice:join-server", (serverId: string) => {
+          console.log("[Socket] voice:join-server:", serverId, "socketId:", socket.id);
           socket.join(`voice:${serverId}`);
           if (voiceChannels[serverId]) {
+            console.log("[Socket] Sending current voice state:", voiceChannels[serverId]);
             socket.emit(`voice:${serverId}:update`, voiceChannels[serverId]);
           }
         });
 
         socket.on("voice:leave-server", (serverId: string) => {
+          console.log("[Socket] voice:leave-server:", serverId);
           socket.leave(`voice:${serverId}`);
         });
 
         socket.on("voice:join-channel", ({ serverId, channelId, participant }) => {
+          console.log("[Socket] voice:join-channel:", { serverId, channelId, participant });
+          
           if (!voiceChannels[serverId]) {
             voiceChannels[serverId] = {};
           }
@@ -67,6 +72,7 @@ const ioHandler = (req: NextApiRequest, res: NextApiResponseServerIO) => {
           
           if (!exists) {
             voiceChannels[serverId][channelId].push(participant);
+            console.log("[Socket] Broadcasting participant-join, voiceChannels:", voiceChannels);
             io.to(`voice:${serverId}`).emit(`voice:${serverId}:participant-join`, {
               channelId,
               participant,
@@ -75,6 +81,7 @@ const ioHandler = (req: NextApiRequest, res: NextApiResponseServerIO) => {
         });
 
         socket.on("voice:leave-channel", ({ serverId, channelId, odId }) => {
+          console.log("[Socket] voice:leave-channel:", { serverId, channelId, odId });
           if (voiceChannels[serverId]?.[channelId]) {
             voiceChannels[serverId][channelId] = voiceChannels[serverId][channelId].filter(
               (p) => p.odId !== odId

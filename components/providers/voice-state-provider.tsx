@@ -169,8 +169,18 @@ export const VoiceStateProvider = ({ children }: { children: ReactNode }) => {
 
   // Socket events for voice participants
   useEffect(() => {
+    console.log("[VoiceState] Effect:", { 
+      hasSocket: !!socket, 
+      socketConnected: socket?.connected,
+      isConnected: voiceState.isConnected, 
+      serverId: voiceState.serverId, 
+      hasToken: !!voiceState.token, 
+      hasEmittedJoin: hasEmittedJoin.current 
+    });
+
     if (!socket || !voiceState.isConnected || !voiceState.serverId || !voiceState.token || hasEmittedJoin.current) return;
 
+    console.log("[VoiceState] Emitting voice:join-server", voiceState.serverId);
     socket.emit("voice:join-server", voiceState.serverId);
 
     const participant = {
@@ -181,6 +191,7 @@ export const VoiceStateProvider = ({ children }: { children: ReactNode }) => {
     };
 
     setTimeout(() => {
+      console.log("[VoiceState] Emitting voice:join-channel", { serverId: voiceState.serverId, channelId: voiceState.channelId });
       socket.emit("voice:join-channel", {
         serverId: voiceState.serverId,
         channelId: voiceState.channelId,

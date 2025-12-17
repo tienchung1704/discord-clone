@@ -46,11 +46,17 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     socketRef.current = socketInstance;
 
     socketInstance.on("connect", () => {
+      console.log("[Socket] Connected:", socketInstance.id);
       setIsConnected(true);
     });
 
-    socketInstance.on("disconnect", () => {
+    socketInstance.on("disconnect", (reason) => {
+      console.log("[Socket] Disconnected:", reason);
       setIsConnected(false);
+    });
+
+    socketInstance.on("connect_error", (error) => {
+      console.log("[Socket] Connection error:", error.message);
     });
 
     setSocket(socketInstance);
