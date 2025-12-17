@@ -1,4 +1,5 @@
 import { NanigationSideBar } from "@/components/navigation/navigation-sidebar";
+import { VoiceStatusBar } from "@/components/voice/voice-status-bar";
 
 const MainLayout = async ({ children }: { children: React.ReactNode }) => {
   return (
@@ -7,6 +8,7 @@ const MainLayout = async ({ children }: { children: React.ReactNode }) => {
         <NanigationSideBar />
       </div>
       <main className="md:pl-[72px] h-full">{children}</main>
+      <VoiceStatusBar />
     </div>
   );
 };

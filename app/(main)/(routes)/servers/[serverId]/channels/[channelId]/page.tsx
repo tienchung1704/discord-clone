@@ -6,8 +6,9 @@ import { ChatHeader } from "@/components/chat/chat-header";
 import ChatInput from "@/components/chat/chat-input";
 import ChatMessages from "@/components/chat/chat-messages";
 import { ChannelType } from "@/lib/generated/prisma";
-import MediaRoom from "@/components/media-room";
 import { RedirectToSignIn } from "@clerk/nextjs";
+import { VoiceChannelView } from "@/components/voice/voice-channel-view";
+
 interface ChannelIdPageProps {
   params: Promise<{
     serverId: string;
@@ -29,7 +30,12 @@ export default async function ChannelIdPage({ params }: ChannelIdPageProps) {
     where: { serverId: serverId, profileId: profile.id }
   });
 
-  if (!channel || !member) return redirect("/");
+  const server = await db.server.findUnique({
+    where: { id: serverId },
+    select: { name: true }
+  });
+
+  if (!channel || !member || !server) return redirect("/");
 
   const isVoiceChannel = channel.type === ChannelType.AUDIO || channel.type === ChannelType.VIDEO;
 
@@ -67,21 +73,13 @@ export default async function ChannelIdPage({ params }: ChannelIdPageProps) {
           />
         </>
       )}
-      {channel.type === ChannelType.AUDIO && (
-        <MediaRoom 
-          chatId={channel.id} 
-          video={false} 
-          audio={true}
-          profileId={profile.id}
-          profileName={profile.name}
-          profileImageUrl={profile.imageUrl}
-        />
-      )}
-      {channel.type === ChannelType.VIDEO && (
-        <MediaRoom 
-          chatId={channel.id} 
-          video={true} 
-          audio={true}
+      {isVoiceChannel && (
+        <VoiceChannelView
+          channelId={channel.id}
+          channelName={channel.name}
+          serverId={serverId}
+          serverName={server.name}
+          isVideo={channel.type === ChannelType.VIDEO}
           profileId={profile.id}
           profileName={profile.name}
           profileImageUrl={profile.imageUrl}

@@ -32,12 +32,19 @@ const MediaRoom = ({
   const serverId = params?.serverId as string;
 
   useEffect(() => {
-    if (!user?.firstName || !user?.lastName) return;
-    const name = `${user.firstName} ${user.lastName}`;
+    if (!user?.firstName && !user?.lastName) return;
+    
+    // Sanitize name for LiveKit - remove special chars, keep alphanumeric and spaces
+    const rawName = `${user.firstName || ""} ${user.lastName || ""}`.trim();
+    const sanitizedName = rawName
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
+      .replace(/[^a-zA-Z0-9\s]/g, "") // Keep only alphanumeric and spaces
+      .trim() || "User";
 
     (async () => {
       try {
-        const resp = await fetch(`/api/token?room=${chatId}&username=${name}`);
+        const resp = await fetch(`/api/token?room=${chatId}&username=${encodeURIComponent(sanitizedName)}`);
         const data = await resp.json();
         setToken(data.token);
       } catch (error) {

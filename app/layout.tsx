@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { ModalProvider } from "@/components/providers/modal-provider";
 import { SocketProvider } from "@/components/providers/socket-provider";
 import { VoiceProvider } from "@/components/providers/voice-provider";
+import { VoiceStateProvider } from "@/components/providers/voice-state-provider";
 import QueryProvider from "@/components/providers/query-provider";
 import "react-toastify/dist/ReactToastify.css";
 import { Open_Sans } from "next/font/google";
@@ -36,11 +37,13 @@ export default function RootLayout({
           >
             <SocketProvider>
               <VoiceProvider>
-                <ModalProvider />
-                <QueryProvider>
-                  <ToastContainer position="top-right" autoClose={3000} />
-                  {children}
-                </QueryProvider>
+                <VoiceStateProvider>
+                  <ModalProvider />
+                  <QueryProvider>
+                    <ToastContainer position="top-right" autoClose={3000} />
+                    {children}
+                  </QueryProvider>
+                </VoiceStateProvider>
               </VoiceProvider>
             </SocketProvider>
           </ThemeProvider>

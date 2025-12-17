@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { io as ClientIO, Socket } from "socket.io-client";
 
 type SocketContextType = {
@@ -20,19 +20,30 @@ export const useSocket = () => {
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    const socketInstance = ClientIO(process.env.NEXT_PUBLIC_BASE_URL!, {
+    // Prevent duplicate connections
+    if (socketRef.current) return;
+
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
+
+    const socketInstance = ClientIO(baseUrl, {
       path: "/api/socket/io",
       addTrailingSlash: false,
-      reconnection: true,
-      reconnectionAttempts: 10,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      timeout: 20000,
+      // Use polling first in dev, then upgrade to websocket
       transports: ["polling", "websocket"],
       upgrade: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 500,
+      reconnectionDelayMax: 2000,
+      timeout: 20000,
+      forceNew: false,
+      multiplex: true,
     });
+
+    socketRef.current = socketInstance;
 
     socketInstance.on("connect", () => {
       setIsConnected(true);
@@ -46,6 +57,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     return () => {
       socketInstance.disconnect();
+      socketRef.current = null;
     };
   }, []);
 

@@ -25,10 +25,22 @@ import { Button } from "../ui/button";
 import { useModal } from "../hooks/user-model-store";
 
 
+interface CustomRoleData {
+  customRole: {
+    id: string;
+    name: string;
+    color: string;
+    position: number;
+  };
+}
+
 interface ChatItemProps {
   id: string;
   content: string;
-  member: Member & { profile: Profile };
+  member: Member & { 
+    profile: Profile;
+    customRoles?: CustomRoleData[];
+  };
   timestamp: string;
   fileUrl: string | null;
   deleted: boolean;
@@ -123,6 +135,14 @@ export function ChatItem({
   const isPDF = fileType === "pdf" && fileUrl;
   const isImage = !isPDF && fileUrl;
 
+  // Get highest position custom role for name color
+  const highestRole = member.customRoles?.length 
+    ? member.customRoles.reduce((highest, current) => 
+        current.customRole.position > highest.customRole.position ? current : highest
+      )
+    : null;
+  const nameColor = highestRole?.customRole.color;
+
   return (
     <div className="relative group flex items-center hover:bg-black/5 p-4 transition w-full">
       <div className="group flex gap-x-2 items-center w-full">
@@ -138,6 +158,7 @@ export function ChatItem({
               <p
                 onClick={onMemberClick}
                 className="font-semibold text-sm hover:underline cursor-pointer"
+                style={nameColor ? { color: nameColor } : undefined}
               >
                 {member.profile.name}
               </p>

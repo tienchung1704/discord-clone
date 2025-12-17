@@ -3,36 +3,11 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { MemberRole } from "@/lib/generated/prisma/client";
 import { ScrollArea } from "../ui/scroll-area";
-import { Crown, Shield, Users, DiamondPlus } from "lucide-react";
 import { MemberItem } from "./member-item";
 
 interface ServerSidebarProps {
   serverId: string;
 }
-
-const roleConfig = {
-  [MemberRole.ADMIN]: {
-    label: "Admin",
-    icon: Crown,
-    color: "text-rose-500",
-    bgColor: "bg-rose-500/10",
-    borderColor: "border-rose-500/20",
-  },
-  [MemberRole.MODERATOR]: {
-    label: "Moderator", 
-    icon: Shield,
-    color: "text-indigo-500",
-    bgColor: "bg-indigo-500/10",
-    borderColor: "border-indigo-500/20",
-  },
-  [MemberRole.GUEST]: {
-    label: "Member",
-    icon: Users,
-    color: "text-emerald-500",
-    bgColor: "bg-emerald-500/10",
-    borderColor: "border-emerald-500/20",
-  },
-};
 
 export const ShowMemberChannel = async ({ serverId }: ServerSidebarProps) => {
   const profile = await currentProfile();
@@ -53,10 +28,21 @@ export const ShowMemberChannel = async ({ serverId }: ServerSidebarProps) => {
               isPremium: true,
               status: true,
             }
-          } 
+          },
+          customRoles: {
+            include: {
+              customRole: true
+            },
+            orderBy: {
+              customRole: { position: "desc" }
+            }
+          }
         },
         orderBy: { role: "asc" },
       },
+      customRoles: {
+        orderBy: { position: "desc" }
+      }
     },
   });
 
@@ -64,43 +50,43 @@ export const ShowMemberChannel = async ({ serverId }: ServerSidebarProps) => {
     return redirect("/");
   }
 
-  const role = server.members.find((m) => m.profileId === profile.id)?.role;
+  // Group members by custom role first, then by system role
+  const customRoleGroups = server.customRoles.map(role => ({
+    role,
+    members: server.members.filter(m => 
+      m.customRoles.some(cr => cr.customRoleId === role.id)
+    )
+  })).filter(g => g.members.length > 0);
 
-  // Tách members theo vai trò
-  const admins = server.members.filter((m) => m.role === MemberRole.ADMIN);
-  const moderators = server.members.filter((m) => m.role === MemberRole.MODERATOR);
-  const guests = server.members.filter((m) => m.role === MemberRole.GUEST);
+  // Members without custom roles, grouped by system role
+  const membersWithoutCustomRole = server.members.filter(m => m.customRoles.length === 0);
+  const admins = membersWithoutCustomRole.filter((m) => m.role === MemberRole.ADMIN);
+  const moderators = membersWithoutCustomRole.filter((m) => m.role === MemberRole.MODERATOR);
+  const guests = membersWithoutCustomRole.filter((m) => m.role === MemberRole.GUEST);
 
   const renderSection = (
     members: typeof server.members,
-    roleType: MemberRole
+    label: string,
+    color?: string
   ) => {
     if (!members.length) return null;
-    
-    const config = roleConfig[roleType];
-    const Icon = config.icon;
 
     return (
       <div className="mb-4">
-        {/* Section Header */}
-        <div className={`flex items-center gap-2 px-2 py-1.5 rounded-md ${config.bgColor} border ${config.borderColor} mb-2`}>
-          <Icon className={`h-4 w-4 ${config.color}`} />
-          <span className={`text-xs font-semibold uppercase tracking-wide ${config.color}`}>
-            {config.label}
-          </span>
-          <span className="text-xs text-zinc-500 dark:text-zinc-400 ml-auto">
-            {members.length}
+        <div className="px-2 py-1">
+          <span 
+            className="text-xs font-semibold uppercase"
+            style={{ color: color || undefined }}
+          >
+            {label} — {members.length}
           </span>
         </div>
-        
-        {/* Members List */}
         <div className="space-y-0.5">
           {members.map((member) => (
             <MemberItem 
               key={member.id}
               member={member}
               server={server}
-              roleType={roleType}
             />
           ))}
         </div>
@@ -110,21 +96,15 @@ export const ShowMemberChannel = async ({ serverId }: ServerSidebarProps) => {
 
   return (
     <div className="flex flex-col h-full text-primary w-full dark:bg-[#2B2D31] bg-[#F2F3F5]">
-      {/* Header */}
-      <div className="px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">
-        <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-          Members
-        </h3>
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          {server.members.length} total
-        </p>
-      </div>
-
-      {/* Members List */}
       <ScrollArea className="flex-1 px-2 py-3">
-        {renderSection(admins, MemberRole.ADMIN)}
-        {renderSection(moderators, MemberRole.MODERATOR)}
-        {renderSection(guests, MemberRole.GUEST)}
+        {/* Custom roles first */}
+        {customRoleGroups.map(({ role, members }) => (
+          renderSection(members, role.name, role.color)
+        ))}
+        {/* Then system roles */}
+        {renderSection(admins, "Admin")}
+        {renderSection(moderators, "Moderator")}
+        {renderSection(guests, "Member")}
       </ScrollArea>
     </div>
   );

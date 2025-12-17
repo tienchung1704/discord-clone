@@ -89,6 +89,7 @@ model Server{
   
   members Member[]
   channels Channel[]
+  customRoles CustomRole[]
   hobby      String?
   isPublic   Boolean @default(false)
 
@@ -96,6 +97,41 @@ model Server{
   updatedAt DateTime @updatedAt
   
   @@index([profileId])
+}
+
+// Custom Role for server
+model CustomRole {
+  id String @id @default(uuid())
+  name String
+  color String @default("#99AAB5") // Default Discord gray
+  position Int @default(0) // Higher = more important
+  
+  serverId String
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  
+  members MemberCustomRole[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([serverId])
+}
+
+// Junction table for Member-CustomRole many-to-many
+model MemberCustomRole {
+  id String @id @default(uuid())
+  
+  memberId String
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  customRoleId String
+  customRole CustomRole @relation(fields: [customRoleId], references: [id], onDelete: Cascade)
+  
+  assignedAt DateTime @default(now())
+  
+  @@unique([memberId, customRoleId])
+  @@index([memberId])
+  @@index([customRoleId])
 }
 
 enum MemberRole {
@@ -121,6 +157,7 @@ model Member{
   conversationsReceived Conversation[] @relation("MemberTwo")
 
   channels  ChannelMember[]
+  customRoles MemberCustomRole[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

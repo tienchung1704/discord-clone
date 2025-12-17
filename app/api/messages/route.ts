@@ -34,6 +34,10 @@ export async function GET(req:Request) {
                     member: {
                         include: {
                             profile: true,
+                            customRoles: {
+                                include: { customRole: true },
+                                orderBy: { customRole: { position: "desc" } }
+                            }
                         }
                     }
                 },
@@ -51,6 +55,10 @@ export async function GET(req:Request) {
                     member: {
                         include: {
                             profile: true,
+                            customRoles: {
+                                include: { customRole: true },
+                                orderBy: { customRole: { position: "desc" } }
+                            }
                         }
                     }
                 },

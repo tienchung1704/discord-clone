@@ -20,6 +20,7 @@ import { CreatePublicServerModal } from "../modals/create-server-public-modal";
 import { GetPublicServerModal } from "../modals/get-public-server-modal";
 import PaymentModal from "../modals/payment";
 import PaymentPageModal from "../modals/payment-page-modal";
+import { ManageRolesModal } from "../modals/manage-roles-modal";
 
 export const ModalProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -54,6 +55,7 @@ export const ModalProvider = () => {
       <StartServerModal />
       <GetPublicServerModal />
       <PaymentPageModal />
+      <ManageRolesModal />
     </>
   );
 };

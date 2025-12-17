@@ -3,7 +3,7 @@
 import { MemberRole } from "@/lib/generated/prisma";
 import { ServerWithMembersWithProfile } from "@/types";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
-import { ChevronDown, LogOut, PlusCircle, Settings, Trash, UserPlus, Users } from "lucide-react";
+import { ChevronDown, LogOut, PlusCircle, Settings, Trash, UserPlus, Users, Shield } from "lucide-react";
 import { useModal } from "../hooks/user-model-store";
 
 
@@ -48,6 +48,12 @@ export const ServerHeader = ({ server, role }: ServerHeaderProps) => {
                     <DropdownMenuItem onClick={()=> onOpen("members",  { server })} className="px-3 py-2 text-sm cursor-pointer">
                         Manage Members
                         <Users className="h-4 w-4 ml-auto" />
+                    </DropdownMenuItem>
+                )}
+                {isModerator && (
+                    <DropdownMenuItem onClick={()=> onOpen("manageRoles",  { server })} className="px-3 py-2 text-sm cursor-pointer">
+                        Manage Roles
+                        <Shield className="h-4 w-4 ml-auto" />
                     </DropdownMenuItem>
                 )}
                 {isModerator && (

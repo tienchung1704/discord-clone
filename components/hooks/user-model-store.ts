@@ -19,7 +19,8 @@ export type ModalType =
   | "getPublicServer"
   | "payment"
   | "paymentPage"
-  | "selectInterests";
+  | "selectInterests"
+  | "manageRoles";
 
 interface ModalData {
   server?: Server;

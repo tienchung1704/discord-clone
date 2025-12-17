@@ -133,7 +133,7 @@ export function EditServerModal() {
               />
             </div>
             
-            <DialogFooter className="bg-zinc-500 dark:bg-zinc-700 px-6 py-4">
+            <DialogFooter className="bg-zinc-500 dark:bg-zinc-800 px-6 py-4">
               <Button 
                 disabled={isLoading} 
                 className="bg-indigo-500 hover:bg-indigo-600 text-white font-medium transition-colors"

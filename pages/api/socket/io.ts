@@ -24,8 +24,17 @@ const ioHandler = (req: NextApiRequest, res: NextApiResponseServerIO) => {
         path: path,
         addTrailingSlash: false,
         transports: ["websocket", "polling"],
-        pingTimeout: 60000,
-        pingInterval: 25000,
+        // Optimized settings for speed
+        pingTimeout: 30000,
+        pingInterval: 10000,
+        upgradeTimeout: 10000,
+        maxHttpBufferSize: 1e6, // 1MB
+        // Compression for faster data transfer
+        perMessageDeflate: {
+          threshold: 1024, // Only compress messages > 1KB
+        },
+        // Allow concurrent connections
+        allowEIO3: true,
       });
 
       // Store voice channel participants per server
@@ -35,7 +44,6 @@ const ioHandler = (req: NextApiRequest, res: NextApiResponseServerIO) => {
         // Voice channel events
         socket.on("voice:join-server", (serverId: string) => {
           socket.join(`voice:${serverId}`);
-          // Send current voice state
           if (voiceChannels[serverId]) {
             socket.emit(`voice:${serverId}:update`, voiceChannels[serverId]);
           }
@@ -53,7 +61,6 @@ const ioHandler = (req: NextApiRequest, res: NextApiResponseServerIO) => {
             voiceChannels[serverId][channelId] = [];
           }
           
-          // Check if already in channel
           const exists = voiceChannels[serverId][channelId].find(
             (p) => p.odId === participant.odId
           );

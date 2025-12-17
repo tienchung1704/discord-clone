@@ -67,7 +67,11 @@ export default async function handler(
       include: {
         member: {
           include: {
-            profile: true
+            profile: true,
+            customRoles: {
+              include: { customRole: true },
+              orderBy: { customRole: { position: "desc" } }
+            }
           }
         }
       }
@@ -96,7 +100,11 @@ export default async function handler(
         include: {
           member: {
             include: {
-              profile: true
+              profile: true,
+              customRoles: {
+                include: { customRole: true },
+                orderBy: { customRole: { position: "desc" } }
+              }
             }
           }
         }
@@ -117,7 +125,11 @@ export default async function handler(
         include: {
           member: {
             include: {
-              profile: true
+              profile: true,
+              customRoles: {
+                include: { customRole: true },
+                orderBy: { customRole: { position: "desc" } }
+              }
             }
           }
         }

@@ -26,37 +26,24 @@ export default async function handler(
     if (!content?.trim() && !fileUrl) {
       return res.status(400).json({ error: "Content or file is required" });
     }
-    const server = await db.server.findFirst({
-      where: {
-        id: serverId as string,
-        members: {
-          some: {
-            profileId: profile.id,
-          },
-        },
-      },
-      include: {
-        members: true,
-      },
-    });
 
-    if (!server) return res.status(404).json({ message: "Server not found" });
-
-    const channel = await db.channel.findFirst({
+    // Single optimized query - get member with channel validation
+    const member = await db.member.findFirst({
       where: {
-        id: channelId as string,
+        profileId: profile.id,
         serverId: serverId as string,
+        server: {
+          channels: {
+            some: { id: channelId as string }
+          }
+        }
       },
+      select: { id: true }
     });
 
-    if (!channel) return res.status(404).json({ message: "Channel not found" });
+    if (!member) return res.status(404).json({ message: "Not authorized" });
 
-    const member = server.members.find(
-      (member) => member.profileId === profile.id
-    );
-
-    if (!member) return res.status(404).json({ message: "Member not found" });
-
+    // Create message with profile and customRoles included
     const message = await db.message.create({
       data: {
         content,
@@ -68,13 +55,16 @@ export default async function handler(
         member: {
           include: {
             profile: true,
+            customRoles: {
+              include: { customRole: true },
+              orderBy: { customRole: { position: "desc" } }
+            }
           },
         },
       },
     });
 
     const channelKey = `chat:${channelId}:messages`;
-
     res?.socket?.server?.io?.emit(channelKey, message);
 
     return res.status(200).json(message);
