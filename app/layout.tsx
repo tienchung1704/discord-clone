@@ -11,6 +11,7 @@ import QueryProvider from "@/components/providers/query-provider";
 import "react-toastify/dist/ReactToastify.css";
 import { Open_Sans } from "next/font/google";
 import { ToastContainer } from "react-toastify";
+import { Analytics } from "@vercel/analytics/next";
 
 const openSans = Open_Sans({ subsets: ["latin"] });
 
@@ -47,6 +48,7 @@ export default function RootLayout({
               </VoiceProvider>
             </SocketProvider>
           </ThemeProvider>
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
