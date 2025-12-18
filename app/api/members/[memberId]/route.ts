@@ -3,6 +3,26 @@ import { NextResponse } from "next/server";
 import { currentProfile } from "@/lib/current-profile";
 import { db } from "@/lib/db";
 
+// Optimized member include - only fetch required profile fields
+const memberInclude = {
+  members: {
+    include: {
+      profile: {
+        select: {
+          id: true,
+          name: true,
+          imageUrl: true,
+          email: true,
+          // Exclude: userId, isPremium, status, lastSeen, createdAt, updatedAt
+        }
+      }
+    },
+    orderBy: {
+      role: "asc" as const
+    }
+  }
+};
+
 export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ memberId: string }> }
@@ -36,16 +56,7 @@ export async function DELETE(
           }
         }
       },
-      include: {
-        members: {
-          include: {
-            profile: true
-          },
-          orderBy: {
-            role: "asc"
-          }
-        }
-      }
+      include: memberInclude
     });
 
     return NextResponse.json(server);
@@ -92,16 +103,7 @@ export async function PATCH(
           }
         }
       },
-      include: {
-        members: {
-          include: {
-            profile: true
-          },
-          orderBy: {
-            role: "asc"
-          }
-        }
-      }
+      include: memberInclude
     });
 
     return NextResponse.json(server);

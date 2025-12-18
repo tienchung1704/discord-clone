@@ -1,11 +1,36 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, ReactNode, useEffect, useRef } from "react";
-import { LiveKitRoom, VideoConference, RoomAudioRenderer } from "@livekit/components-react";
-import "@livekit/components-styles";
+import dynamic from "next/dynamic";
+import { Loader2 } from "lucide-react";
 import { useSocket } from "@/components/providers/socket-provider";
 import { useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
+
+// Lazy load LiveKit components to reduce initial bundle size
+// Requirements: 12.3 - WHEN loading voice features THEN the Discord_Clone SHALL lazy load LiveKit components
+const LiveKitRoom = dynamic(
+  () => import("@livekit/components-react").then((mod) => mod.LiveKitRoom),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex flex-col flex-1 justify-center items-center h-full">
+        <Loader2 className="h-7 w-7 text-zinc-500 animate-spin my-4" />
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">Loading voice components...</p>
+      </div>
+    ),
+  }
+);
+
+const VideoConference = dynamic(
+  () => import("@livekit/components-react").then((mod) => mod.VideoConference),
+  { ssr: false }
+);
+
+const RoomAudioRenderer = dynamic(
+  () => import("@livekit/components-react").then((mod) => mod.RoomAudioRenderer),
+  { ssr: false }
+);
 
 interface VoiceState {
   isConnected: boolean;
@@ -69,7 +94,25 @@ const PersistentLiveKitRoom = ({
   onDisconnect: () => void;
   isViewingVoiceChannel: boolean;
 }) => {
+  const [stylesLoaded, setStylesLoaded] = useState(false);
+
+  // Lazy load LiveKit styles
+  useEffect(() => {
+    import("@livekit/components-styles").then(() => {
+      setStylesLoaded(true);
+    });
+  }, []);
+
   if (!voiceState.token) return null;
+
+  if (!stylesLoaded) {
+    return (
+      <div className="flex flex-col flex-1 justify-center items-center h-full">
+        <Loader2 className="h-7 w-7 text-zinc-500 animate-spin my-4" />
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">Loading voice styles...</p>
+      </div>
+    );
+  }
 
   // Single LiveKitRoom instance - position changes based on viewing state
   return (

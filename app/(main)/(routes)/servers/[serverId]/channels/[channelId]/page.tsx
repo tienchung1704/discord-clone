@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { ChatHeader } from "@/components/chat/chat-header";
 import ChatInput from "@/components/chat/chat-input";
 import ChatMessages from "@/components/chat/chat-messages";
+import { TypingIndicator } from "@/components/chat/typing-indicator";
 import { ChannelType } from "@/lib/generated/prisma";
 import { RedirectToSignIn } from "@clerk/nextjs";
 import { VoiceChannelView } from "@/components/voice/voice-channel-view";
@@ -44,6 +45,7 @@ export default async function ChannelIdPage({ params }: ChannelIdPageProps) {
       <ChatHeader
         name={channel.name}
         serverId={channel.serverId}
+        channelId={channel.id}
         type="channel"
       />
       {channel.type === ChannelType.TEXT && (
@@ -62,6 +64,10 @@ export default async function ChannelIdPage({ params }: ChannelIdPageProps) {
             paramKey="channelId"
             paramValue={channel.id}
           />
+          <TypingIndicator
+            channelId={channel.id}
+            currentUserId={profile.id}
+          />
           <ChatInput
             name={channel.name}
             type="channel"
@@ -70,6 +76,9 @@ export default async function ChannelIdPage({ params }: ChannelIdPageProps) {
               channelId: channel.id,
               serverId: channel.serverId
             }}
+            channelId={channel.id}
+            userId={profile.id}
+            userName={profile.name}
           />
         </>
       )}

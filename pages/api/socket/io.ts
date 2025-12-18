@@ -41,6 +41,36 @@ const ioHandler = (req: NextApiRequest, res: NextApiResponseServerIO) => {
       const voiceChannels: Record<string, Record<string, any[]>> = {};
 
       io.on("connection", (socket) => {
+        // Heartbeat ping/pong mechanism for connection health
+        socket.on("heartbeat:ping", (data: { timestamp: number }) => {
+          // Respond with pong immediately to measure latency
+          socket.emit("heartbeat:pong", { timestamp: data.timestamp });
+        });
+
+        // Handle missed messages sync request
+        socket.on("sync:missed-messages", (data: { since: number }) => {
+          console.log("[Socket] Missed messages sync requested since:", new Date(data.since).toISOString());
+          // In a full implementation, this would query the database for messages
+          // sent after the 'since' timestamp and emit them back to the client.
+          // For now, we acknowledge the request - the actual sync will be handled
+          // by the client refetching via React Query when it detects reconnection.
+          socket.emit("sync:missed-messages:response", { 
+            messages: [],
+            syncedAt: Date.now()
+          });
+        });
+
+        // Typing indicator events
+        socket.on("typing:start", (data: { channelId: string; userId: string; userName: string }) => {
+          // Broadcast typing event to all users in the channel except the sender
+          const typingKey = `typing:${data.channelId}`;
+          socket.broadcast.emit(typingKey, {
+            channelId: data.channelId,
+            userId: data.userId,
+            userName: data.userName,
+          });
+        });
+
         // Voice channel events
         socket.on("voice:join-server", (serverId: string) => {
           console.log("[Socket] voice:join-server:", serverId, "socketId:", socket.id);

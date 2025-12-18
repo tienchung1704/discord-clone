@@ -9,12 +9,17 @@ import axios from "axios";
 import { useModal } from "../hooks/user-model-store";
 import { EmojiPicker } from "../emoji-picker";
 import { Gift, Plus } from "lucide-react";
+import { useSocket } from "../providers/socket-provider";
+import { useRef, useCallback, useEffect } from "react";
 
 interface ChatInputProps {
   apiUrl: string;
   query: Record<string, any>;
   name: string;
   type: "conversation" | "channel";
+  channelId?: string;
+  userId?: string;
+  userName?: string;
 }
 
 const formSchema = z.object({
@@ -54,8 +59,15 @@ const checkToxicAsync = async (text: string): Promise<{ toxicity: number; spam: 
   }
 };
 
-export const ChatInput = ({ apiUrl, query, name, type }: ChatInputProps) => {
+// Debounce delay for typing events (to avoid spam)
+const TYPING_DEBOUNCE_DELAY = 500;
+
+export const ChatInput = ({ apiUrl, query, name, type, channelId, userId, userName }: ChatInputProps) => {
   const { onOpen } = useModal();
+  const { socket } = useSocket();
+  const lastTypingEmitRef = useRef<number>(0);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -64,6 +76,44 @@ export const ChatInput = ({ apiUrl, query, name, type }: ChatInputProps) => {
   });
 
   const isLoading = form.formState.isSubmitting;
+
+  // Emit typing event with debounce
+  const emitTypingEvent = useCallback(() => {
+    if (!socket || !channelId || !userId || !userName) return;
+    
+    const now = Date.now();
+    // Only emit if enough time has passed since last emit (debounce)
+    if (now - lastTypingEmitRef.current < TYPING_DEBOUNCE_DELAY) return;
+    
+    lastTypingEmitRef.current = now;
+    socket.emit("typing:start", {
+      channelId,
+      userId,
+      userName,
+    });
+  }, [socket, channelId, userId, userName]);
+
+  // Handle input change to emit typing events
+  const handleInputChange = useCallback(
+    (value: string, onChange: (value: string) => void) => {
+      onChange(value);
+      
+      // Only emit typing if there's actual content
+      if (value.trim().length > 0) {
+        emitTypingEvent();
+      }
+    },
+    [emitTypingEvent]
+  );
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -114,6 +164,7 @@ export const ChatInput = ({ apiUrl, query, name, type }: ChatInputProps) => {
                       type === "conversation" ? name : "#" + name
                     }`}
                     {...field}
+                    onChange={(e) => handleInputChange(e.target.value, field.onChange)}
                     className="pl-14 pr-24 py-6 bg-zinc-200/90 dark:bg-zinc-700/75 border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
                   />
                   <div className="absolute top-1/2 -translate-y-1/2 right-8 flex items-center gap-2">

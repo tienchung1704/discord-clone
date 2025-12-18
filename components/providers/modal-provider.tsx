@@ -1,32 +1,168 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { InviteModal } from "@/components/modals/invite-modal";
-import { CreateServerModal } from "@/components/modals/create-server-modal";
-import { EditServerModal } from "@/components/modals/sever-modal";
-import { MembersModal } from "@/components/modals/members-modal";
-import { CreateChannelModal } from "@/components/modals/create-channel-modal";
-import { LeaveServerModal } from "@/components/modals/leave-server-modal";
-import { DeleteServerModal } from "@/components/modals/delete-server-modal";
-import { DeleteChannelModal } from "@/components/modals/delete-channel-modal";
-import { EditChanelModal } from "@/components/modals/edit-channel-modal";
-import { MessageFileModal } from "@/components/modals/message-file";
-import { DeleteMessageModal } from "@/components/modals/delete-message";
-import JoinServerModal from "../modals/jion-server-modal";
-import { SelectInterestsModal } from "@/components/modals/select-interest-modal";
-import { StartServerModal } from "../modals/start-server-modal";
-import { PublicServerModal } from "../modals/select-hobby-server-modal";
-import { CreatePublicServerModal } from "../modals/create-server-public-modal";
-import { GetPublicServerModal } from "../modals/get-public-server-modal";
-import PaymentModal from "../modals/payment";
-import PaymentPageModal from "../modals/payment-page-modal";
-import { ManageRolesModal } from "../modals/manage-roles-modal";
+import { useEffect, useState, Suspense, lazy } from "react";
+import { useModal, ModalType } from "@/components/hooks/user-model-store";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Lazy load all modal components - only loaded when needed (Requirements 2.1, 2.2)
+const CreateServerModal = lazy(() =>
+  import("@/components/modals/create-server-modal").then((mod) => ({
+    default: mod.CreateServerModal,
+  }))
+);
+
+const PublicServerModal = lazy(() =>
+  import("@/components/modals/select-hobby-server-modal").then((mod) => ({
+    default: mod.PublicServerModal,
+  }))
+);
+
+const JoinServerModal = lazy(() =>
+  import("@/components/modals/jion-server-modal")
+);
+
+const CreatePublicServerModal = lazy(() =>
+  import("@/components/modals/create-server-public-modal").then((mod) => ({
+    default: mod.CreatePublicServerModal,
+  }))
+);
+
+const InviteModal = lazy(() =>
+  import("@/components/modals/invite-modal").then((mod) => ({
+    default: mod.InviteModal,
+  }))
+);
+
+const MembersModal = lazy(() =>
+  import("@/components/modals/members-modal").then((mod) => ({
+    default: mod.MembersModal,
+  }))
+);
+
+const EditServerModal = lazy(() =>
+  import("@/components/modals/sever-modal").then((mod) => ({
+    default: mod.EditServerModal,
+  }))
+);
+
+const CreateChannelModal = lazy(() =>
+  import("@/components/modals/create-channel-modal").then((mod) => ({
+    default: mod.CreateChannelModal,
+  }))
+);
+
+
+const LeaveServerModal = lazy(() =>
+  import("@/components/modals/leave-server-modal").then((mod) => ({
+    default: mod.LeaveServerModal,
+  }))
+);
+
+const DeleteServerModal = lazy(() =>
+  import("@/components/modals/delete-server-modal").then((mod) => ({
+    default: mod.DeleteServerModal,
+  }))
+);
+
+const DeleteChannelModal = lazy(() =>
+  import("@/components/modals/delete-channel-modal").then((mod) => ({
+    default: mod.DeleteChannelModal,
+  }))
+);
+
+const EditChanelModal = lazy(() =>
+  import("@/components/modals/edit-channel-modal").then((mod) => ({
+    default: mod.EditChanelModal,
+  }))
+);
+
+const MessageFileModal = lazy(() =>
+  import("@/components/modals/message-file").then((mod) => ({
+    default: mod.MessageFileModal,
+  }))
+);
+
+const DeleteMessageModal = lazy(() =>
+  import("@/components/modals/delete-message").then((mod) => ({
+    default: mod.DeleteMessageModal,
+  }))
+);
+
+const SelectInterestsModal = lazy(() =>
+  import("@/components/modals/select-interest-modal").then((mod) => ({
+    default: mod.SelectInterestsModal,
+  }))
+);
+
+const PaymentModal = lazy(() => import("@/components/modals/payment"));
+
+const StartServerModal = lazy(() =>
+  import("@/components/modals/start-server-modal").then((mod) => ({
+    default: mod.StartServerModal,
+  }))
+);
+
+const GetPublicServerModal = lazy(() =>
+  import("@/components/modals/get-public-server-modal").then((mod) => ({
+    default: mod.GetPublicServerModal,
+  }))
+);
+
+const PaymentPageModal = lazy(() =>
+  import("@/components/modals/payment-page-modal")
+);
+
+const ManageRolesModal = lazy(() =>
+  import("@/components/modals/manage-roles-modal").then((mod) => ({
+    default: mod.ManageRolesModal,
+  }))
+);
+
+
+// Modal loading skeleton fallback for Suspense (Requirements 2.2)
+const ModalLoadingSkeleton = () => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="bg-white dark:bg-zinc-900 rounded-lg p-6 w-full max-w-md mx-4">
+      <Skeleton className="h-8 w-3/4 mb-4" />
+      <Skeleton className="h-4 w-full mb-2" />
+      <Skeleton className="h-4 w-2/3 mb-6" />
+      <div className="flex justify-end gap-2">
+        <Skeleton className="h-10 w-20" />
+        <Skeleton className="h-10 w-20" />
+      </div>
+    </div>
+  </div>
+);
+
+// Map modal types to their lazy-loaded components
+const MODAL_COMPONENTS: Record<ModalType, React.LazyExoticComponent<React.ComponentType<any>>> = {
+  createServer: CreateServerModal,
+  publicServer: PublicServerModal,
+  joinServer: JoinServerModal,
+  createPublicServer: CreatePublicServerModal,
+  invite: InviteModal,
+  members: MembersModal,
+  editServer: EditServerModal,
+  createChannel: CreateChannelModal,
+  leaveServer: LeaveServerModal,
+  deleteServer: DeleteServerModal,
+  deleteChannel: DeleteChannelModal,
+  editChannel: EditChanelModal,
+  messageFile: MessageFileModal,
+  deleteMessage: DeleteMessageModal,
+  selectInterests: SelectInterestsModal,
+  payment: PaymentModal,
+  createStartServer: StartServerModal,
+  getPublicServer: GetPublicServerModal,
+  paymentPage: PaymentPageModal,
+  manageRoles: ManageRolesModal,
+};
 
 export const ModalProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
+  const { type, isOpen } = useModal();
 
   useEffect(() => {
-    console.log("ModalProvider mounted");
     setIsMounted(true);
   }, []);
 
@@ -34,28 +170,23 @@ export const ModalProvider = () => {
     return null;
   }
 
+  // Only render the active modal - Requirements 2.3, 2.4
+  // When modal is closed, component is unmounted to free memory
+  if (!isOpen || !type) {
+    return null;
+  }
+
+  const ModalComponent = MODAL_COMPONENTS[type];
+
+  if (!ModalComponent) {
+    return null;
+  }
+
+  // Render only the active modal with Suspense fallback
+  // Dynamic import happens only when modal is first opened (Requirements 2.1, 2.2)
   return (
-    <>
-      <CreateServerModal />
-      <PublicServerModal />
-      <JoinServerModal />
-      <CreatePublicServerModal />
-      <InviteModal />
-      <MembersModal />
-      <EditServerModal />
-      <CreateChannelModal />
-      <LeaveServerModal />
-      <DeleteServerModal />
-      <DeleteChannelModal />
-      <EditChanelModal />
-      <MessageFileModal />
-      <DeleteMessageModal />
-      <SelectInterestsModal />
-      <PaymentModal />
-      <StartServerModal />
-      <GetPublicServerModal />
-      <PaymentPageModal />
-      <ManageRolesModal />
-    </>
+    <Suspense fallback={<ModalLoadingSkeleton />}>
+      <ModalComponent />
+    </Suspense>
   );
 };

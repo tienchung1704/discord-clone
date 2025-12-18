@@ -6,7 +6,7 @@ import { ServerHeader } from "./server-header";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Hash, Mic, ShieldAlert, ShieldCheck, Video } from "lucide-react";
 import { ServerSection } from "./server-section";
-import { ServerChannel } from "./server-channel";
+import { ServerChannelList } from "./server-channel-list";
 import { ServerVoiceInit } from "./server-voice-init";
 interface ServerSidebarProps {
     serverId: string;
@@ -29,6 +29,9 @@ export const ServerSidebar = async ({ serverId }: ServerSidebarProps) => {
     if (!profile) {
         return redirect("/"); // or handle the case where the profile is not found
     }
+    
+    // Optimized query - fetch channels and members with profile data
+    // Note: Full profile is needed for modals (members modal uses email)
     const server = await db.server.findUnique({
         where: {
             id: serverId,
@@ -49,13 +52,14 @@ export const ServerSidebar = async ({ serverId }: ServerSidebarProps) => {
             },
         }
     });
-    const textChannels = server?.channels.filter((channel) => channel.type === ChannelType.TEXT);
-    const audioChannels = server?.channels.filter((channel) => channel.type === ChannelType.AUDIO);
-    const videoChannels = server?.channels.filter((channel) => channel.type === ChannelType.VIDEO);
 
     if (!server) {
         return redirect("/");
     }
+
+    const textChannels = server.channels.filter((channel) => channel.type === ChannelType.TEXT);
+    const audioChannels = server.channels.filter((channel) => channel.type === ChannelType.AUDIO);
+    const videoChannels = server.channels.filter((channel) => channel.type === ChannelType.VIDEO);
 
     const role = server.members.find((member) => member.profileId === profile.id)?.role;
 
@@ -67,31 +71,37 @@ export const ServerSidebar = async ({ serverId }: ServerSidebarProps) => {
                 {!!textChannels?.length && (
                     <div className="mb-2">
                         <ServerSection sectionType="channels" channelType={ChannelType.TEXT} role={role} label="Text Channels" />
-                        <div className="space-y-[2px] " >
-                            {textChannels.map((channel) => (
-                                <ServerChannel key={channel.id} channel={channel} role={role} server={server} />
-                            ))}
-                        </div>
+                        <ServerChannelList 
+                            channels={textChannels} 
+                            server={server} 
+                            role={role} 
+                            profileId={profile.id}
+                            channelType={ChannelType.TEXT}
+                        />
                     </div>
                 )}
                 {!!audioChannels?.length && (
                     <div className="mb-2">
                         <ServerSection sectionType="channels" channelType={ChannelType.AUDIO} role={role} label="Voice Channels" />
-                        <div className="space-y-[2px] " >
-                            {audioChannels.map((channel) => (
-                                <ServerChannel key={channel.id} channel={channel} role={role} server={server} />
-                            ))}
-                        </div>
+                        <ServerChannelList 
+                            channels={audioChannels} 
+                            server={server} 
+                            role={role} 
+                            profileId={profile.id}
+                            channelType={ChannelType.AUDIO}
+                        />
                     </div>
                 )}
                 {!!videoChannels?.length && (
                     <div className="mb-2">
                         <ServerSection sectionType="channels" channelType={ChannelType.VIDEO} role={role} label="Video Channels" />
-                        <div className="space-y-[2px] " >
-                            {videoChannels.map((channel) => (
-                                <ServerChannel key={channel.id} channel={channel} role={role} server={server} />
-                            ))}
-                        </div>
+                        <ServerChannelList 
+                            channels={videoChannels} 
+                            server={server} 
+                            role={role} 
+                            profileId={profile.id}
+                            channelType={ChannelType.VIDEO}
+                        />
                     </div>
                 )}
             </ScrollArea>

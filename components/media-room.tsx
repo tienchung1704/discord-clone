@@ -1,12 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LiveKitRoom, VideoConference } from "@livekit/components-react";
-import "@livekit/components-styles";
+import dynamic from "next/dynamic";
 import { useUser } from "@clerk/nextjs";
 import { Loader2 } from "lucide-react";
 import { useSocket } from "@/components/providers/socket-provider";
 import { useParams } from "next/navigation";
+
+// Lazy load LiveKit components to reduce initial bundle size
+// Requirements: 12.3 - WHEN loading voice features THEN the Discord_Clone SHALL lazy load LiveKit components
+const LiveKitRoom = dynamic(
+  () => import("@livekit/components-react").then((mod) => mod.LiveKitRoom),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex flex-col flex-1 justify-center items-center">
+        <Loader2 className="h-7 w-7 text-zinc-500 animate-spin my-4" />
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">Loading voice components...</p>
+      </div>
+    ),
+  }
+);
+
+const VideoConference = dynamic(
+  () => import("@livekit/components-react").then((mod) => mod.VideoConference),
+  { ssr: false }
+);
 
 interface MediaRoomProps {
   chatId: string;
@@ -29,7 +48,15 @@ const MediaRoom = ({
   const { socket } = useSocket();
   const params = useParams();
   const [token, setToken] = useState("");
+  const [stylesLoaded, setStylesLoaded] = useState(false);
   const serverId = params?.serverId as string;
+
+  // Lazy load LiveKit styles
+  useEffect(() => {
+    import("@livekit/components-styles").then(() => {
+      setStylesLoaded(true);
+    });
+  }, []);
 
   useEffect(() => {
     if (!user?.firstName && !user?.lastName) return;
@@ -100,7 +127,7 @@ const MediaRoom = ({
     };
   }, [socket, serverId, chatId, profileId, profileName, profileImageUrl, token, user]);
 
-  if (token === "") {
+  if (token === "" || !stylesLoaded) {
     return (
       <div className="flex flex-col flex-1 justify-center items-center">
         <Loader2 className="h-7 w-7 text-zinc-500 animate-spin my-4" />

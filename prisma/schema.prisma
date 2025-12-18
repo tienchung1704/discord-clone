@@ -73,6 +73,9 @@ model Profile{
   conversationsReceived GlobalConversation[] @relation("ProfileTwo")
   globalDirectMessages GlobalDirectMessage[]
 
+  // Channel read state tracking
+  channelReadStates ChannelReadState[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -152,6 +155,8 @@ model Member{
 
   messages Message[]
   directMessages DirectMessage[]
+  reactions Reaction[]
+  pinnedMessages PinnedMessage[]
   
   conversationsInitiated Conversation[] @relation("MemberOne")
   conversationsReceived Conversation[] @relation("MemberTwo")
@@ -185,6 +190,8 @@ model Channel{
 
   messages Message[]
   members ChannelMember[]
+  readStates ChannelReadState[]
+  pinnedMessages PinnedMessage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -205,10 +212,30 @@ model Message {
 
   deleted Boolean @default(false)
 
+  reactions Reaction[]
+  pinnedMessage PinnedMessage?
+
   createdAt DateTime  @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([channelId])
+  @@index([memberId])
+}
+
+model Reaction {
+  id        String   @id @default(uuid())
+  emoji     String
+  
+  messageId String
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  
+  memberId  String
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([messageId, memberId, emoji])
+  @@index([messageId])
   @@index([memberId])
 }
 
@@ -300,4 +327,39 @@ model ChannelMember {
   @@unique([channelId, memberId]) // 1 member chỉ join 1 channel một lần
   @@index([channelId])
   @@index([memberId])
+}
+
+model ChannelReadState {
+  id              String   @id @default(uuid())
+  
+  channelId       String
+  channel         Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  
+  profileId       String
+  profile         Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  lastReadMessageId String?
+  lastReadAt      DateTime @default(now())
+  
+  @@unique([channelId, profileId])
+  @@index([channelId])
+  @@index([profileId])
+}
+
+model PinnedMessage {
+  id        String   @id @default(uuid())
+  
+  messageId String   @unique
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  
+  channelId String
+  channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  
+  pinnedById String
+  pinnedBy   Member   @relation(fields: [pinnedById], references: [id], onDelete: Cascade)
+  
+  pinnedAt  DateTime @default(now())
+  
+  @@index([channelId])
+  @@index([pinnedById])
 }

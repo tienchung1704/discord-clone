@@ -6,6 +6,7 @@ import { getOrCreateGlobalConversation } from "@/lib/global-conversation";
 import { ChatHeader } from "@/components/chat/chat-header";
 import ChatMessages from "@/components/chat/chat-messages";
 import ChatInput from "@/components/chat/chat-input";
+import { TypingIndicator } from "@/components/chat/typing-indicator";
 import MediaRoom from "@/components/media-room";
 
 interface ProfileDMPageProps {
@@ -76,6 +77,10 @@ export default async function ProfileDMPage({
               conversationId: conversation.id,
             }}
           />
+          <TypingIndicator
+            channelId={conversation.id}
+            currentUserId={profile.id}
+          />
           <ChatInput
             name={otherUser.name}
             type="conversation"
@@ -83,6 +88,9 @@ export default async function ProfileDMPage({
             query={{
               conversationId: conversation.id,
             }}
+            channelId={conversation.id}
+            userId={profile.id}
+            userName={profile.name}
           />
         </>
       )}

@@ -2,6 +2,8 @@ import { Hash, Mic, ShieldAlert, ShieldCheck, Video } from "lucide-react";
 import { MobileToggle } from "@/components/mobile-toggle/mobile-toggle";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ChatVideoButton } from "./chat-video-button";
+import { ChatSearchButton } from "./chat-search-button";
+import { PinnedMessagesButton } from "./pinned-messages-button";
 import { db } from "@/lib/db";
 import { ChannelType, MemberRole } from "@/lib/generated/prisma/client";
 import { ServerSearch } from "@/components/server/server-search";
@@ -9,6 +11,7 @@ import { currentProfile } from "@/lib/current-profile";
 import { redirect } from "next/navigation";
 interface ChatHeaderProps {
     serverId?: string,
+    channelId?: string,
     name: string,
     type: "channel" | "conversation";
     imgUrl?: string,
@@ -27,7 +30,7 @@ const roleIconMap = {
     [MemberRole.ADMIN]: <ShieldAlert className="mr-2 h-4 w-4 text-rose-500 " />
 }
 
-export const ChatHeader = async ({ serverId, name, type, imgUrl }: ChatHeaderProps) => {
+export const ChatHeader = async ({ serverId, channelId, name, type, imgUrl }: ChatHeaderProps) => {
     const profile = await currentProfile();
     if (!profile) {
         return redirect("/"); 
@@ -70,7 +73,13 @@ export const ChatHeader = async ({ serverId, name, type, imgUrl }: ChatHeaderPro
             )}
 
             <p className="font-semibold text-md text-black dark:text-white">{name}</p>
-            <div className="ml-auto mr-62 flex items-center">
+            <div className="ml-auto mr-62 flex items-center gap-2">
+                {type === "channel" && channelId && serverId && (
+                    <>
+                        <PinnedMessagesButton channelId={channelId} serverId={serverId} />
+                        <ChatSearchButton channelId={channelId} />
+                    </>
+                )}
                 {type === "conversation" && (
                     <ChatVideoButton />
                 )}

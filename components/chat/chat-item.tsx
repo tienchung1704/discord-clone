@@ -10,8 +10,9 @@ import { UserAvatar } from "../ui/user-avatar";
 import { ActionTooltip } from "../ui/action-tooltip";
 import {
   Edit,
-  EditIcon,
   FileIcon,
+  Pin,
+  PinOff,
   ShieldAlert,
   ShieldCheck,
   Trash,
@@ -23,6 +24,7 @@ import { Form, FormField, FormItem, FormControl } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useModal } from "../hooks/user-model-store";
+import { MessageReactions, ReactionButton } from "./message-reactions";
 
 
 interface CustomRoleData {
@@ -31,6 +33,20 @@ interface CustomRoleData {
     name: string;
     color: string;
     position: number;
+  };
+}
+
+interface ReactionData {
+  id: string;
+  emoji: string;
+  memberId: string;
+  member: {
+    id: string;
+    profile: {
+      id: string;
+      name: string;
+      imageUrl: string;
+    };
   };
 }
 
@@ -48,6 +64,8 @@ interface ChatItemProps {
   isUpdated: boolean;
   socketUrl: string;
   socketQuery: Record<string, string>;
+  reactions?: ReactionData[];
+  isPinned?: boolean;
 }
 
 const roleIconMap = {
@@ -70,9 +88,13 @@ export function ChatItem({
   currentMember,
   isUpdated,
   socketUrl,
-  socketQuery
+  socketQuery,
+  reactions = [],
+  isPinned = false
 }: ChatItemProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [pinned, setPinned] = useState(isPinned);
+  const [isPinLoading, setIsPinLoading] = useState(false);
   const { onOpen } = useModal();
 
   const params = useParams();
@@ -125,6 +147,32 @@ export function ChatItem({
     form.reset({ content });
   }, [content, form]);
 
+  useEffect(() => {
+    setPinned(isPinned);
+  }, [isPinned]);
+
+  const onPinToggle = async () => {
+    try {
+      setIsPinLoading(true);
+      const url = qs.stringifyUrl({
+        url: `/api/messages/${id}/pin`,
+        query: socketQuery
+      });
+
+      if (pinned) {
+        await axios.delete(url);
+        setPinned(false);
+      } else {
+        await axios.post(url);
+        setPinned(true);
+      }
+    } catch (error) {
+      console.error("Failed to toggle pin:", error);
+    } finally {
+      setIsPinLoading(false);
+    }
+  };
+
   const fileType = fileUrl?.split(".").pop();
 
   const isAdmin = currentMember.role === MemberRole.ADMIN;
@@ -132,6 +180,7 @@ export function ChatItem({
   const isOwner = currentMember.id === member.id;
   const canDeleteMessage = !deleted && (isAdmin || isModerator || isOwner);
   const canEditMessage = !deleted && isOwner && !fileUrl;
+  const canPinMessage = !deleted && (isAdmin || isModerator);
   const isPDF = fileType === "pdf" && fileUrl;
   const isImage = !isPDF && fileUrl;
 
@@ -169,6 +218,11 @@ export function ChatItem({
             <span className="text-xs text-zinc-500 dark:text-zinc-400">
               {timestamp}
             </span>
+            {pinned && (
+              <ActionTooltip label="Pinned message">
+                <Pin className="h-3 w-3 text-amber-500" />
+              </ActionTooltip>
+            )}
           </div>
           {isImage && (
             <a
@@ -247,10 +301,47 @@ export function ChatItem({
               </span>
             </Form>
           )}
+          {/* Message Reactions Display */}
+          {!deleted && reactions.length > 0 && (
+            <MessageReactions
+              messageId={id}
+              reactions={reactions}
+              currentMemberId={currentMember.id}
+              socketUrl={socketUrl}
+              socketQuery={socketQuery}
+            />
+          )}
         </div>
       </div>
-      {canDeleteMessage && (
+      {!deleted && (
         <div className="hidden group-hover:flex items-center gap-x-2 absolute p-1 -top-2 right-5 bg-white dark:bg-zinc-800 border rounded-sm">
+          {/* Reaction Button */}
+          <ReactionButton
+            messageId={id}
+            socketUrl={socketUrl}
+            socketQuery={socketQuery}
+          />
+          {canPinMessage && (
+            <ActionTooltip label={pinned ? "Unpin message" : "Pin message"}>
+              {pinned ? (
+                <PinOff
+                  onClick={onPinToggle}
+                  className={cn(
+                    "cursor-pointer ml-auto w-4 h-4 text-amber-500 hover:text-amber-600 transition",
+                    isPinLoading && "opacity-50 cursor-not-allowed"
+                  )}
+                />
+              ) : (
+                <Pin
+                  onClick={onPinToggle}
+                  className={cn(
+                    "cursor-pointer ml-auto w-4 h-4 text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition",
+                    isPinLoading && "opacity-50 cursor-not-allowed"
+                  )}
+                />
+              )}
+            </ActionTooltip>
+          )}
           {canEditMessage && (
             <ActionTooltip label="Edit">
               <Edit
@@ -259,17 +350,19 @@ export function ChatItem({
               />
             </ActionTooltip>
           )}
-          <ActionTooltip label="Delete">
-            <Trash
-              onClick={() =>
-                onOpen("deleteMessage", {
-                  apiUrl: `${socketUrl}/${id}`,
-                  query: socketQuery
-                })
-              }
-              className="cursor-pointer ml-auto w-4 h-4 text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition"
-            />
-          </ActionTooltip>
+          {canDeleteMessage && (
+            <ActionTooltip label="Delete">
+              <Trash
+                onClick={() =>
+                  onOpen("deleteMessage", {
+                    apiUrl: `${socketUrl}/${id}`,
+                    query: socketQuery
+                  })
+                }
+                className="cursor-pointer ml-auto w-4 h-4 text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition"
+              />
+            </ActionTooltip>
+          )}
         </div>
       )}
     </div>
