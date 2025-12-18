@@ -16,7 +16,7 @@ import { Analytics } from "@vercel/analytics/next";
 const openSans = Open_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Discord Clone",
+  title: "Discordddddddd ",
   description:
     "Discord Clone with Next.js, React.js, TailWindCSS & TypeScript.",
 };
