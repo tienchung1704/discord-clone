@@ -33,6 +33,7 @@ interface MessageSearchProps {
   channelId: string;
   onResultClick: (messageId: string) => void;
   onClose: () => void;
+  position?: "absolute" | "fixed";
 }
 
 const DATE_FORMAT = "MMM d, yyyy 'at' h:mm a";
@@ -40,7 +41,8 @@ const DATE_FORMAT = "MMM d, yyyy 'at' h:mm a";
 export const MessageSearch = ({
   channelId,
   onResultClick,
-  onClose
+  onClose,
+  position = "absolute"
 }: MessageSearchProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedQuery = useDebounce(searchQuery, 300);
@@ -74,8 +76,12 @@ export const MessageSearch = ({
     onClose();
   };
 
+  const positionClasses = position === "fixed"
+    ? "fixed top-14 right-64 z-50"
+    : "absolute top-12 right-0 z-50";
+
   return (
-    <div className="absolute top-12 right-0 w-80 md:w-96 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg z-50 max-h-[500px] overflow-hidden flex flex-col">
+    <div className={`${positionClasses} w-80 md:w-96 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg max-h-[500px] overflow-hidden flex flex-col`}>
       {/* Search Header */}
       <div className="p-3 border-b border-zinc-200 dark:border-zinc-700">
         <div className="flex items-center gap-2">

@@ -36,6 +36,14 @@ const nextConfig = {
         protocol: "https",
         hostname: "utfs.io",
       },
+      {
+        protocol: "https",
+        hostname: "img.clerk.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.clerk.dev",
+      },
     ],
     // Cache images lâu hơn
     minimumCacheTTL: 60 * 60 * 24, // 24 hours

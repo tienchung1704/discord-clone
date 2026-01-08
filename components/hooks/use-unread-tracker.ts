@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
 import { useSocket } from "@/components/providers/socket-provider";
 import { Member, Message, Profile } from "@/lib/generated/prisma";
 
@@ -34,6 +34,11 @@ export const useUnreadTracker = ({
   const { socket } = useSocket();
   const [unreadCounts, setUnreadCounts] = useState<UnreadState>({});
   const [isLoading, setIsLoading] = useState(true);
+  const hasFetchedRef = useRef(false);
+  const channelIdsRef = useRef<string[]>([]);
+
+  // Check if channelIds actually changed (by value, not reference)
+  const channelIdsKey = channelIds.sort().join(",");
 
   // Fetch initial unread counts for all channels
   const fetchUnreadCounts = useCallback(async () => {
@@ -67,7 +72,8 @@ export const useUnreadTracker = ({
     } finally {
       setIsLoading(false);
     }
-  }, [channelIds]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [channelIdsKey]);
 
   // Mark a channel as read
   const markAsRead = useCallback(async (channelId: string) => {
@@ -103,10 +109,16 @@ export const useUnreadTracker = ({
     }));
   }, []);
 
-  // Fetch initial unread counts on mount
+  // Fetch initial unread counts on mount or when channelIds actually change
   useEffect(() => {
-    fetchUnreadCounts();
-  }, [fetchUnreadCounts]);
+    // Only fetch if channelIds actually changed or first mount
+    if (!hasFetchedRef.current || channelIdsRef.current.join(",") !== channelIdsKey) {
+      hasFetchedRef.current = true;
+      channelIdsRef.current = [...channelIds];
+      fetchUnreadCounts();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [channelIdsKey]);
 
   // Mark current channel as read when it changes
   useEffect(() => {
@@ -118,6 +130,8 @@ export const useUnreadTracker = ({
   // Subscribe to new message events via socket
   useEffect(() => {
     if (!socket) return;
+
+    const currentChannelIds = channelIdsRef.current;
 
     // Listen for new messages in any channel
     const handleNewMessage = (message: MessageWithMemberWithProfile) => {
@@ -138,19 +152,20 @@ export const useUnreadTracker = ({
     };
 
     // Subscribe to message events for all channels in the server
-    channelIds.forEach((channelId) => {
+    currentChannelIds.forEach((channelId) => {
       const addKey = `chat:${channelId}:messages`;
       socket.on(addKey, handleNewMessage);
     });
 
     return () => {
       // Unsubscribe from all channel events
-      channelIds.forEach((channelId) => {
+      currentChannelIds.forEach((channelId) => {
         const addKey = `chat:${channelId}:messages`;
         socket.off(addKey, handleNewMessage);
       });
     };
-  }, [socket, channelIds, currentChannelId, profileId, incrementUnread]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket, channelIdsKey, currentChannelId, profileId, incrementUnread]);
 
   return {
     unreadCounts,

@@ -2,8 +2,7 @@ import { Hash, Mic, ShieldAlert, ShieldCheck, Video } from "lucide-react";
 import { MobileToggle } from "@/components/mobile-toggle/mobile-toggle";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ChatVideoButton } from "./chat-video-button";
-import { ChatSearchButton } from "./chat-search-button";
-import { PinnedMessagesButton } from "./pinned-messages-button";
+import { ChatHeaderActions } from "./chat-header-actions";
 import { db } from "@/lib/db";
 import { ChannelType, MemberRole } from "@/lib/generated/prisma/client";
 import { ServerSearch } from "@/components/server/server-search";
@@ -73,19 +72,9 @@ export const ChatHeader = async ({ serverId, channelId, name, type, imgUrl }: Ch
             )}
 
             <p className="font-semibold text-md text-black dark:text-white">{name}</p>
-            <div className="ml-auto mr-62 flex items-center gap-2">
-                {type === "channel" && channelId && serverId && (
-                    <>
-                        <PinnedMessagesButton channelId={channelId} serverId={serverId} />
-                        <ChatSearchButton channelId={channelId} />
-                    </>
-                )}
-                {type === "conversation" && (
-                    <ChatVideoButton />
-                )}
-
+            <div className="ml-auto flex items-center gap-2">
                 {server && (
-                    <div className="w-53 absolute right-4">
+                    <div className="w-48">
                         <ServerSearch data={[{
                             label: "Text Channels",
                             type: "channel",
@@ -131,7 +120,10 @@ export const ChatHeader = async ({ serverId, channelId, name, type, imgUrl }: Ch
                         />
                     </div>
                 )}
-
+                {type === "conversation" && (
+                    <ChatVideoButton />
+                )}
+                {serverId && <ChatHeaderActions serverId={serverId} channelId={channelId} type={type} />}
             </div>
         </div>
     )

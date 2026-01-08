@@ -87,12 +87,11 @@ function MessageRow({
   name,
   onLoadMore,
 }: MessageRowProps): ReactElement {
-  // Messages are displayed in reverse order (newest at bottom)
-  // Index 0 = newest message (at bottom), higher index = older messages (at top)
-  const reversedIndex = messages.length - 1 - index;
+  // Index 0 = welcome/load more (at top)
+  // Index 1+ = messages (oldest first at top, newest at bottom)
   
-  // Show welcome message or load more at the top (highest index)
-  if (index === messages.length) {
+  // Show welcome message or load more at the top (index 0)
+  if (index === 0) {
     if (!hasNextPage) {
       return (
         <div style={style} {...ariaAttributes}>
@@ -122,7 +121,10 @@ function MessageRow({
     );
   }
 
-  const message = messages[reversedIndex];
+  // Messages: index 1 = oldest message, higher index = newer messages
+  // messages array is [newest, ..., oldest], so we need to reverse
+  const messageIndex = messages.length - index;
+  const message = messages[messageIndex];
   
   if (!message) {
     return <div style={style} {...ariaAttributes} />;
@@ -190,14 +192,13 @@ export function VirtualizedMessages({
       messages.length > prevMessagesLength.current &&
       listRef.current
     ) {
-      // Check if we should auto-scroll (user is near bottom)
-      // For now, always scroll to newest message when it arrives
-      listRef.current.scrollToRow({ index: 0, align: "end" });
+      // Scroll to newest message (at the bottom, which is the last index)
+      listRef.current.scrollToRow({ index: itemCount - 1, align: "end" });
     }
     
     prevFirstMessageId.current = currentFirstId;
     prevMessagesLength.current = messages.length;
-  }, [messages, listRef]);
+  }, [messages, listRef, itemCount]);
 
   // Row props to pass to each row (excluding index, style, ariaAttributes which are injected by List)
   const rowProps = {
@@ -224,8 +225,8 @@ export function VirtualizedMessages({
         overscanCount={OVERSCAN_COUNT}
         rowComponent={MessageRow}
         onRowsRendered={(visibleRows) => {
-          // Load more when user scrolls near the top (older messages)
-          if (visibleRows.stopIndex >= messages.length - 2 && hasNextPage && !isFetchingNextPage) {
+          // Load more when user scrolls near the top (index 0 = welcome/load more)
+          if (visibleRows.startIndex <= 2 && hasNextPage && !isFetchingNextPage) {
             handleLoadMore();
           }
         }}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { Channel, ChannelType, MemberRole, Server } from "@/lib/generated/prisma";
 import { useParams } from "next/navigation";
 import { useUnreadTracker } from "../hooks/use-unread-tracker";
@@ -27,8 +28,11 @@ export const ServerChannelList = ({
   const params = useParams();
   const currentChannelId = params?.channelId as string | undefined;
 
-  // Get all channel IDs for this channel type
-  const channelIds = channels.map((channel) => channel.id);
+  // Memoize channel IDs to prevent unnecessary re-fetches
+  const channelIds = useMemo(
+    () => channels.map((channel) => channel.id),
+    [channels]
+  );
 
   const { getUnreadCount } = useUnreadTracker({
     serverId: server.id,

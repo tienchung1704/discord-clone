@@ -44,6 +44,7 @@ interface PinnedMessagesPanelProps {
   serverId: string;
   onClose: () => void;
   onMessageClick?: (messageId: string) => void;
+  position?: "absolute" | "fixed";
 }
 
 const DATE_FORMAT = "d MMM yyyy, HH:mm";
@@ -53,6 +54,7 @@ export const PinnedMessagesPanel = ({
   serverId,
   onClose,
   onMessageClick,
+  position = "absolute",
 }: PinnedMessagesPanelProps) => {
   const [pinnedMessages, setPinnedMessages] = useState<PinnedMessageData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -84,8 +86,12 @@ export const PinnedMessagesPanel = ({
     console.log("Navigate to pinned message:", messageId);
   };
 
+  const positionClasses = position === "fixed" 
+    ? "fixed top-14 right-64 z-50" 
+    : "absolute top-10 right-0 z-50";
+
   return (
-    <div className="absolute top-10 right-0 z-50 w-80 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-md shadow-lg">
+    <div className={`${positionClasses} w-80 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-md shadow-lg`}>
       <div className="flex items-center justify-between p-3 border-b border-zinc-200 dark:border-zinc-700">
         <div className="flex items-center gap-2">
           <Pin className="h-4 w-4 text-zinc-500" />

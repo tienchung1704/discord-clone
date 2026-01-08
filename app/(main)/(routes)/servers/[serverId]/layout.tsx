@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import { ShowMemberChannel } from "@/components/righsidebar/right-sidebar";
 import { RightSidebarSkeleton } from "@/components/righsidebar/member-skeleton";
+import { RightSidebarContainer } from "@/components/righsidebar/right-sidebar-container";
+import { MainContentWrapper } from "@/components/righsidebar/main-content-wrapper";
 import { ServerSidebar } from "@/components/server/server-siderbar";
 import { currentProfile } from "@/lib/current-profile";
 import { db } from "@/lib/db";
@@ -41,12 +43,14 @@ const ServerIdLayout = async ({
       <div className="hidden md:flex h-full w-60 z-20 flex-col fixed inset-y-0">
         <ServerSidebar serverId={serverId} />
       </div>
-      <main className="h-full md:pl-60 md:pr-60">{children}</main>
-      <div className="hidden md:flex h-full w-60 flex-col fixed inset-y-0 right-0 border-l border-zinc-200 dark:border-zinc-700 mt-12 z-10">
-        <Suspense fallback={<RightSidebarSkeleton />}>
-          <ShowMemberChannel serverId={serverId} />
-        </Suspense>
-      </div>
+      <MainContentWrapper>{children}</MainContentWrapper>
+      <RightSidebarContainer>
+        <div className="hidden md:flex w-60 flex-col fixed top-12 bottom-0 right-0 border-l border-zinc-200 dark:border-zinc-700 z-10 overflow-hidden">
+          <Suspense fallback={<RightSidebarSkeleton />}>
+            <ShowMemberChannel serverId={serverId} />
+          </Suspense>
+        </div>
+      </RightSidebarContainer>
     </div>
   );
 };

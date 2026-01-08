@@ -10,23 +10,20 @@ import { MessageSearch } from "./message-search";
 interface ChatSearchButtonProps {
   channelId: string;
   onMessageClick?: (messageId: string) => void;
+  panelPosition?: "absolute" | "fixed";
 }
 
 export const ChatSearchButton = ({
   channelId,
-  onMessageClick
+  onMessageClick,
+  panelPosition = "absolute"
 }: ChatSearchButtonProps) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const handleResultClick = (messageId: string) => {
-    // Scroll to message or navigate - this can be enhanced later
     if (onMessageClick) {
       onMessageClick(messageId);
     }
-    // For now, we'll just close the search panel
-    // The actual scroll-to-message functionality would require
-    // integration with the chat messages component
-    console.log("Navigate to message:", messageId);
   };
 
   return (
@@ -47,6 +44,7 @@ export const ChatSearchButton = ({
           channelId={channelId}
           onResultClick={handleResultClick}
           onClose={() => setIsSearchOpen(false)}
+          position={panelPosition}
         />
       )}
     </div>

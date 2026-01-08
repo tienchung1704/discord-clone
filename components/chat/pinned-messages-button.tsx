@@ -11,12 +11,14 @@ interface PinnedMessagesButtonProps {
   channelId: string;
   serverId: string;
   onMessageClick?: (messageId: string) => void;
+  panelPosition?: "absolute" | "fixed";
 }
 
 export const PinnedMessagesButton = ({
   channelId,
   serverId,
   onMessageClick,
+  panelPosition = "absolute",
 }: PinnedMessagesButtonProps) => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
@@ -47,6 +49,7 @@ export const PinnedMessagesButton = ({
           serverId={serverId}
           onClose={() => setIsPanelOpen(false)}
           onMessageClick={handleMessageClick}
+          position={panelPosition}
         />
       )}
     </div>
