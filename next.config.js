@@ -1,10 +1,12 @@
+const withNextIntl = require('next-intl/plugin')();
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Tối ưu compiler
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
-  
+
   // Tối ưu experimental features
   experimental: {
     optimizePackageImports: [
@@ -25,7 +27,7 @@ const nextConfig = {
       bufferutil: "commonjs bufferutil",
     },
   },
-  
+
   images: {
     remotePatterns: [
       {
@@ -48,7 +50,7 @@ const nextConfig = {
     // Cache images lâu hơn
     minimumCacheTTL: 60 * 60 * 24, // 24 hours
   },
-  
+
   logging: {
     fetches: {
       fullUrl: false,
@@ -59,4 +61,8 @@ const nextConfig = {
   poweredByHeader: false,
 };
 
-module.exports = nextConfig;
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+})
+
+module.exports = withBundleAnalyzer(withNextIntl(nextConfig));

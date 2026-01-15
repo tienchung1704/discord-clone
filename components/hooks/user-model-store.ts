@@ -20,7 +20,8 @@ export type ModalType =
   | "payment"
   | "paymentPage"
   | "selectInterests"
-  | "manageRoles";
+  | "manageRoles"
+  | "createDM";
 
 interface ModalData {
   server?: Server;
@@ -43,7 +44,7 @@ interface ModalStore {
   onClose: () => void;
   hobbyServer?: string;
   hobyyUser?: Record<string, any>;
-  setHobbyServer: (hobby: string | undefined) => void;   
+  setHobbyServer: (hobby: string | undefined) => void;
   setHobbyUser: (hobby: Record<string, any> | undefined) => void;
 
 }

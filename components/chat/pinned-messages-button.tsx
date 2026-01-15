@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Pin } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { ActionTooltip } from "@/components/ui/action-tooltip";
@@ -21,6 +22,7 @@ export const PinnedMessagesButton = ({
   panelPosition = "absolute",
 }: PinnedMessagesButtonProps) => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const t = useTranslations("Chat");
 
   const handleMessageClick = (messageId: string) => {
     if (onMessageClick) {
@@ -32,7 +34,7 @@ export const PinnedMessagesButton = ({
 
   return (
     <div className="relative">
-      <ActionTooltip label="Pinned messages" side="bottom">
+      <ActionTooltip label={t("pinnedMessages")} side="bottom">
         <Button
           variant="ghost"
           size="sm"

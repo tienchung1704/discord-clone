@@ -4,28 +4,42 @@ import { db } from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
-    const { hobby, userId } = await req.json();
+    const { hobby, userId, searchQuery } = await req.json();
     const profile = await currentProfile();
     if (!profile) return new NextResponse("Unauthorized", { status: 401 });
 
-    console.log("Hobby IDs:111111112211111111", hobby);
-    const servers = await db.server.findMany({
-      where: {
-        isPublic: true,
-        hobby: { in: hobby },
-        NOT: {
-          OR: [
-            { profile: { userId } }, 
-            { members: { some: { profileId: profile.id } } },
-          ],
-        },
+    // Build where clause dynamically
+    const whereClause: any = {
+      isPublic: true,
+      NOT: {
+        OR: [
+          { profile: { userId } },
+          { members: { some: { profileId: profile.id } } },
+        ],
       },
+    };
+
+    // Add hobby filter if provided
+    if (hobby && hobby.length > 0) {
+      whereClause.hobby = { in: hobby };
+    }
+
+    // Add search query filter if provided
+    if (searchQuery && searchQuery.trim()) {
+      whereClause.name = {
+        contains: searchQuery.trim(),
+      };
+    }
+
+    const servers = await db.server.findMany({
+      where: whereClause,
       include: {
         profile: true,
         members: {
           select: { profileId: true },
         },
       },
+      take: 20, // Limit results
     });
 
     return NextResponse.json(servers);

@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export const LeaveServerModal = () => {
   const { isOpen, onClose, type, data } = useModal();
@@ -23,6 +24,8 @@ export const LeaveServerModal = () => {
   const isModalOpen = isOpen && type === "leaveServer";
   const { server } = data;
   const [isLoading, setIsLoading] = useState(false);
+  const t = useTranslations("Server");
+  const tCommon = useTranslations("Common");
 
   const onClick = async () => {
     try {
@@ -48,29 +51,29 @@ export const LeaveServerModal = () => {
             </div>
           </div>
           <DialogTitle className="text-xl text-center font-bold">
-            Leave Server
+            {t("leaveTitle")}
           </DialogTitle>
           <DialogDescription className="text-center">
-            Are you sure you want to leave <span className="font-semibold text-amber-500">{server?.name}</span>? You won't be able to rejoin unless you're invited again.
+            {t("leaveConfirm", { name: server?.name ?? "" })}
           </DialogDescription>
         </DialogHeader>
-        
+
         <DialogFooter className="bg-zinc-50 dark:bg-[#2b2d31] px-6 py-4">
           <div className="flex items-center justify-end gap-3 w-full">
-            <Button 
-              disabled={isLoading} 
-              onClick={onClose} 
+            <Button
+              disabled={isLoading}
+              onClick={onClose}
               variant="ghost"
               className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
             >
-              Cancel
+              {tCommon("cancel")}
             </Button>
-            <Button 
-              disabled={isLoading} 
-              onClick={onClick} 
+            <Button
+              disabled={isLoading}
+              onClick={onClick}
               className="bg-amber-500 hover:bg-amber-600 text-white font-medium transition-colors"
             >
-              Leave Server
+              {t("leaveButton")}
             </Button>
           </div>
         </DialogFooter>
@@ -78,3 +81,4 @@ export const LeaveServerModal = () => {
     </Dialog>
   );
 };
+

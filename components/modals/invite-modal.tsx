@@ -16,10 +16,12 @@ import { Button } from "@/components/ui/button";
 import { Check, Copy, RefreshCcw, Users } from "lucide-react";
 import { useOrigin } from "@/components/hooks/use-origin";
 import axios from "axios";
+import { useTranslations } from "next-intl";
 
 export const InviteModal = () => {
   const { onOpen, isOpen, onClose, type, data } = useModal();
   const origin = useOrigin();
+  const t = useTranslations("Server");
 
   const isModalOpen = isOpen && type === "invite";
   const { server } = data;
@@ -27,7 +29,7 @@ export const InviteModal = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const inviteUrl = `${origin}/invite/${server?.inviteCode}`;
-  
+
   const onCopy = () => {
     navigator.clipboard.writeText(inviteUrl);
     setCopied(true);
@@ -35,7 +37,7 @@ export const InviteModal = () => {
       setCopied(false);
     }, 1000);
   }
-  
+
   const onNew = async () => {
     try {
       setIsLoading(true);
@@ -58,50 +60,50 @@ export const InviteModal = () => {
             </div>
           </div>
           <DialogTitle className="text-2xl text-center font-bold">
-            Invite Friends
+            {t("inviteTitle")}
           </DialogTitle>
           <DialogDescription className="text-center">
-            Share this link with others to grant access to <span className="font-semibold text-indigo-500 dark:text-indigo-400">{server?.name}</span>
+            {t("inviteDescription", { name: server?.name || "" })}
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="px-6 pb-6 pt-2">
           <Label className="uppercase text-xs font-bold text-zinc-500 dark:text-zinc-400 tracking-wide">
-            Server Invite Link
+            {t("inviteLink")}
           </Label>
           <div className="flex items-center mt-2 gap-x-2">
-            <Input 
-              disabled={isLoading} 
-              readOnly 
-              className="bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus-visible:ring-2 focus-visible:ring-indigo-500 text-zinc-800 dark:text-zinc-200 font-mono text-sm" 
-              value={inviteUrl} 
+            <Input
+              disabled={isLoading}
+              readOnly
+              className="bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus-visible:ring-2 focus-visible:ring-indigo-500 text-zinc-800 dark:text-zinc-200 font-mono text-sm"
+              value={inviteUrl}
             />
-            <Button 
-              disabled={isLoading} 
-              onClick={onCopy} 
+            <Button
+              disabled={isLoading}
+              onClick={onCopy}
               size="icon"
-              className={`transition-all duration-200 ${
-                copied 
-                  ? 'bg-emerald-500 hover:bg-emerald-600' 
-                  : 'bg-indigo-500 hover:bg-indigo-600'
-              } text-white`}
+              className={`transition-all duration-200 ${copied
+                ? 'bg-emerald-500 hover:bg-emerald-600'
+                : 'bg-indigo-500 hover:bg-indigo-600'
+                } text-white`}
             >
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
             </Button>
           </div>
-          
-          <Button 
-            onClick={onNew} 
-            disabled={isLoading} 
-            variant="ghost" 
-            size="sm" 
+
+          <Button
+            onClick={onNew}
+            disabled={isLoading}
+            variant="ghost"
+            size="sm"
             className="text-xs text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 mt-3 px-0 transition-colors"
           >
             <RefreshCcw className={`w-3 h-3 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-            Generate a new link
+            {t("generateLink")}
           </Button>
         </div>
       </DialogContent>
     </Dialog>
   );
 };
+

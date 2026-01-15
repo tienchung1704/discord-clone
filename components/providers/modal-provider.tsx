@@ -118,6 +118,12 @@ const ManageRolesModal = lazy(() =>
   }))
 );
 
+const CreateDMModal = lazy(() =>
+  import("@/components/modals/create-dm-modal").then((mod) => ({
+    default: mod.CreateDMModal,
+  }))
+);
+
 
 // Modal loading skeleton fallback for Suspense (Requirements 2.2)
 const ModalLoadingSkeleton = () => (
@@ -156,6 +162,7 @@ const MODAL_COMPONENTS: Record<ModalType, React.LazyExoticComponent<React.Compon
   getPublicServer: GetPublicServerModal,
   paymentPage: PaymentPageModal,
   manageRoles: ManageRolesModal,
+  createDM: CreateDMModal,
 };
 
 export const ModalProvider = () => {

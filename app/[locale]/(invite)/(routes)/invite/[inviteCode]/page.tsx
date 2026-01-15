@@ -6,10 +6,9 @@ import { db } from "@/lib/db";
 export default async function InviteCodePage({
   params,
 }: {
-  params: { inviteCode: string } | Promise<{ inviteCode: string }>;
+  params: Promise<{ inviteCode: string }>;
 }) {
-  const { inviteCode } =
-    params instanceof Promise ? await params : params;
+  const { inviteCode } = await params;
 
   const profile = await currentProfile();
   if (!profile) {

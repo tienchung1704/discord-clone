@@ -18,7 +18,7 @@ import {
   Trash,
 } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Form, FormField, FormItem, FormControl } from "../ui/form";
 import { Input } from "../ui/input";
@@ -53,7 +53,7 @@ interface ReactionData {
 interface ChatItemProps {
   id: string;
   content: string;
-  member: Member & { 
+  member: Member & {
     profile: Profile;
     customRoles?: CustomRoleData[];
   };
@@ -78,7 +78,7 @@ const formSchema = z.object({
   content: z.string().min(1)
 });
 
-export function ChatItem({
+const ChatItemBase = ({
   id,
   content,
   member,
@@ -91,7 +91,7 @@ export function ChatItem({
   socketQuery,
   reactions = [],
   isPinned = false
-}: ChatItemProps) {
+}: ChatItemProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [pinned, setPinned] = useState(isPinned);
   const [isPinLoading, setIsPinLoading] = useState(false);
@@ -185,10 +185,10 @@ export function ChatItem({
   const isImage = !isPDF && fileUrl;
 
   // Get highest position custom role for name color
-  const highestRole = member.customRoles?.length 
-    ? member.customRoles.reduce((highest, current) => 
-        current.customRole.position > highest.customRole.position ? current : highest
-      )
+  const highestRole = member.customRoles?.length
+    ? member.customRoles.reduce((highest, current) =>
+      current.customRole.position > highest.customRole.position ? current : highest
+    )
     : null;
   const nameColor = highestRole?.customRole.color;
 
@@ -257,7 +257,7 @@ export function ChatItem({
               className={cn(
                 "text-sm text-zinc-600 dark:text-zinc-300",
                 deleted &&
-                  "italic to-zinc-500 dark:text-zinc-400 text-xs mt-1"
+                "italic to-zinc-500 dark:text-zinc-400 text-xs mt-1"
               )}
             >
               {content}
@@ -368,3 +368,5 @@ export function ChatItem({
     </div>
   );
 }
+
+export const ChatItem = React.memo(ChatItemBase);

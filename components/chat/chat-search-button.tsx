@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { ActionTooltip } from "@/components/ui/action-tooltip";
@@ -19,6 +20,7 @@ export const ChatSearchButton = ({
   panelPosition = "absolute"
 }: ChatSearchButtonProps) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const t = useTranslations("Chat");
 
   const handleResultClick = (messageId: string) => {
     if (onMessageClick) {
@@ -28,7 +30,7 @@ export const ChatSearchButton = ({
 
   return (
     <div className="relative">
-      <ActionTooltip label="Search messages" side="bottom">
+      <ActionTooltip label={t("searchMessages")} side="bottom">
         <Button
           variant="ghost"
           size="sm"

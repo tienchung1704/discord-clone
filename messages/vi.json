@@ -1,0 +1,94 @@
+{
+    "Sidebar": {
+        "findOrStart": "Tìm hoặc bắt đầu cuộc trò chuyện",
+        "directMessages": "Tin nhắn trực tiếp",
+        "createDM": "Tạo tin nhắn mới"
+    },
+    "Common": {
+        "loading": "Đang tải...",
+        "save": "Lưu",
+        "cancel": "Hủy",
+        "create": "Tạo",
+        "delete": "Xóa",
+        "edit": "Sửa",
+        "close": "Đóng",
+        "search": "Tìm kiếm",
+        "noResults": "Không tìm thấy kết quả",
+        "confirm": "Xác nhận",
+        "copied": "Đã sao chép!"
+    },
+    "CreateDM": {
+        "title": "Chọn bạn bè",
+        "subTitle": "Bạn có thể thêm 9 người bạn nữa.",
+        "placeholder": "Nhập tên người dùng của bạn bè",
+        "notFound": "Không tìm thấy bạn bè.",
+        "submit": "Tạo tin nhắn"
+    },
+    "MobileToggle": {
+        "menu": "Menu"
+    },
+    "Chat": {
+        "welcomeChannel": "Chào mừng đến #{name}",
+        "welcomeConversation": "{name}",
+        "channelStart": "Đây là điểm bắt đầu của kênh #{name}.",
+        "conversationStart": "Đây là điểm bắt đầu cuộc trò chuyện với {name}",
+        "messagePlaceholder": "Nhắn tin cho {name}",
+        "messageChannelPlaceholder": "Nhắn tin đến #{name}",
+        "textChannels": "Kênh văn bản",
+        "voiceChannels": "Kênh thoại",
+        "videoChannels": "Kênh video",
+        "members": "Thành viên",
+        "startVideoCall": "Bắt đầu cuộc gọi video",
+        "endVideoCall": "Kết thúc cuộc gọi video",
+        "searchMessages": "Tìm kiếm tin nhắn",
+        "pinnedMessages": "Tin nhắn đã ghim",
+        "noPinnedMessages": "Không có tin nhắn đã ghim",
+        "toggleSidebar": "Bật/tắt thanh bên"
+    },
+    "Language": {
+        "language": "Ngôn ngữ"
+    },
+    "Server": {
+        "createTitle": "Tạo máy chủ của bạn",
+        "createDescription": "Máy chủ là nơi bạn và bạn bè giao lưu. Hãy tạo máy chủ và bắt đầu trò chuyện.",
+        "createMyOwn": "Tạo riêng cho tôi",
+        "createCommunity": "Tạo cho cộng đồng",
+        "joinServer": "Tham gia máy chủ",
+        "deleteTitle": "Xóa máy chủ",
+        "deleteConfirm": "Bạn có chắc muốn xóa {name}? Hành động này không thể hoàn tác.",
+        "deleteButton": "Xóa máy chủ",
+        "leaveTitle": "Rời máy chủ",
+        "leaveConfirm": "Bạn có chắc muốn rời {name}? Bạn không thể tham gia lại trừ khi được mời lại.",
+        "leaveButton": "Rời máy chủ",
+        "inviteTitle": "Mời bạn bè",
+        "inviteDescription": "Chia sẻ liên kết này để cấp quyền truy cập vào {name}",
+        "inviteLink": "Liên kết mời máy chủ",
+        "generateLink": "Tạo liên kết mới",
+        "serverName": "Tên máy chủ",
+        "serverNamePlaceholder": "Nhập tên máy chủ",
+        "addServer": "Thêm máy chủ"
+    },
+    "Channel": {
+        "createTitle": "Tạo kênh",
+        "editTitle": "Chỉnh sửa kênh",
+        "deleteTitle": "Xóa kênh",
+        "deleteConfirm": "Bạn có chắc muốn xóa #{name}? Hành động này không thể hoàn tác.",
+        "channelName": "Tên kênh",
+        "channelType": "Loại kênh",
+        "text": "Văn bản",
+        "audio": "Thoại",
+        "video": "Video"
+    },
+    "Members": {
+        "title": "Quản lý thành viên",
+        "memberCount": "{count} Thành viên",
+        "kick": "Đuổi",
+        "guest": "Khách",
+        "moderator": "Điều hành viên",
+        "admin": "Quản trị viên"
+    },
+    "Navigation": {
+        "addServer": "Thêm máy chủ",
+        "directMessages": "Tin nhắn trực tiếp"
+    }
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, memo, CSSProperties, ReactElement } from "react";
+import React, { useCallback, useEffect, useRef, useState, memo, CSSProperties, ReactElement } from "react";
 import { List, ListImperativeAPI, useDynamicRowHeight, useListRef } from "react-window";
 import { format } from "date-fns";
 import { Member, Message, Profile } from "@/lib/generated/prisma";
@@ -89,7 +89,7 @@ function MessageRow({
 }: MessageRowProps): ReactElement {
   // Index 0 = welcome/load more (at top)
   // Index 1+ = messages (oldest first at top, newest at bottom)
-  
+
   // Show welcome message or load more at the top (index 0)
   if (index === 0) {
     if (!hasNextPage) {
@@ -99,18 +99,18 @@ function MessageRow({
         </div>
       );
     }
-    
+
     // Trigger load more when this item becomes visible
     if (!isFetchingNextPage) {
       onLoadMore();
     }
-    
+
     return (
       <div style={style} {...ariaAttributes} className="flex justify-center items-center py-4">
         {isFetchingNextPage ? (
           <Loader2 className="h-6 w-6 text-zinc-500 animate-spin" />
         ) : (
-          <button 
+          <button
             onClick={onLoadMore}
             className="text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 text-xs dark:hover:text-zinc-300 transition"
           >
@@ -125,7 +125,7 @@ function MessageRow({
   // messages array is [newest, ..., oldest], so we need to reverse
   const messageIndex = messages.length - index;
   const message = messages[messageIndex];
-  
+
   if (!message) {
     return <div style={style} {...ariaAttributes} />;
   }
@@ -185,7 +185,7 @@ export function VirtualizedMessages({
   // Scroll to bottom for new messages (when a new message is added at the beginning)
   useEffect(() => {
     const currentFirstId = messages[0]?.id || null;
-    
+
     // If a new message was added (not from loading older messages)
     if (
       currentFirstId !== prevFirstMessageId.current &&
@@ -195,13 +195,13 @@ export function VirtualizedMessages({
       // Scroll to newest message (at the bottom, which is the last index)
       listRef.current.scrollToRow({ index: itemCount - 1, align: "end" });
     }
-    
+
     prevFirstMessageId.current = currentFirstId;
     prevMessagesLength.current = messages.length;
   }, [messages, listRef, itemCount]);
 
   // Row props to pass to each row (excluding index, style, ariaAttributes which are injected by List)
-  const rowProps = {
+  const rowProps = React.useMemo(() => ({
     messages,
     currentMember,
     socketUrl,
@@ -211,7 +211,17 @@ export function VirtualizedMessages({
     type,
     name,
     onLoadMore: handleLoadMore,
-  };
+  }), [
+    messages,
+    currentMember,
+    socketUrl,
+    socketQuery,
+    hasNextPage,
+    isFetchingNextPage,
+    type,
+    name,
+    handleLoadMore
+  ]);
 
   return (
     <div ref={containerRef} className="flex-1 flex flex-col py-4 overflow-hidden">

@@ -40,7 +40,7 @@ const interestsList = [
 export function PublicServerModal() {
   const [selected, setSelected] = useState<string | null>(null);
 
-  const { isOpen, onClose, type, setHobbyServer, onOpen  } = useModal();
+  const { isOpen, onClose, type, setHobbyServer, onOpen } = useModal();
   const isModalOpen = isOpen && type === "publicServer";
 
 
@@ -50,29 +50,30 @@ export function PublicServerModal() {
   const toggleInterest = (interest: string) => {
     setSelected((prev) => {
       const newValue = prev === interest ? null : interest;
-      setHobbyServer(newValue === null ? undefined : newValue); 
+      setHobbyServer(newValue === null ? undefined : newValue);
       return newValue;
     });
-    setTimeout(()=>{
-        onClose();
-        onOpen("createPublicServer")
+    setTimeout(() => {
+      onClose();
+      onOpen("createPublicServer")
     }, 1500)
   };
 
   return (
     <Dialog open={isModalOpen} onOpenChange={handleClose}>
-      <DialogContent className="bg-white text-black p-0 overflow-hidden">
-        <DialogHeader className="pt-8 px-6">
-          <DialogTitle className="text-2xl text-center font-bold">
-            Select your Hobby
-          </DialogTitle>
-          <DialogDescription className="text-center text-zinc-500">
-            This will help us to customize your server
-          </DialogDescription>
-        </DialogHeader>
-          <form  className="space-y-8">
-            <div className="space-y-8 px-6">
-              <div className="grid grid-cols-2 gap-2 mt-4">
+      <DialogContent className="bg-white text-black overflow-hidden">
+        <div className="p-10">
+          <DialogHeader className="">
+            <DialogTitle className="text-2xl text-center font-bold">
+              Select your Hobby
+            </DialogTitle>
+            <DialogDescription className="text-center text-zinc-500">
+              This will help us to customize your server
+            </DialogDescription>
+          </DialogHeader>
+          <form className="space-y-8 mt-6">
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-2">
                 {interestsList.map((interest, index) => (
                   <Button
                     key={interest}
@@ -88,7 +89,8 @@ export function PublicServerModal() {
               </div>
             </div>
           </form>
-        <DialogFooter className="bg-gray-100 dark:bg-zinc-700 w-full items-center align-middle grid  px-6 py-4">
+        </div>
+        <DialogFooter className="bg-gray-100 dark:bg-zinc-700 w-full items-center align-middle grid px-6 py-4">
           <p className="text-xs">
             {" "}
             By successfully creating a public server, you agree to our public{" "}

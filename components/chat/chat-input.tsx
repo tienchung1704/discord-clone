@@ -11,6 +11,7 @@ import { EmojiPicker } from "../emoji-picker";
 import { Gift, Plus } from "lucide-react";
 import { useSocket } from "../providers/socket-provider";
 import { useRef, useCallback, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 interface ChatInputProps {
   apiUrl: string;
@@ -67,7 +68,8 @@ export const ChatInput = ({ apiUrl, query, name, type, channelId, userId, userNa
   const { socket } = useSocket();
   const lastTypingEmitRef = useRef<number>(0);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
+  const t = useTranslations("Chat");
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -80,11 +82,11 @@ export const ChatInput = ({ apiUrl, query, name, type, channelId, userId, userNa
   // Emit typing event with debounce
   const emitTypingEvent = useCallback(() => {
     if (!socket || !channelId || !userId || !userName) return;
-    
+
     const now = Date.now();
     // Only emit if enough time has passed since last emit (debounce)
     if (now - lastTypingEmitRef.current < TYPING_DEBOUNCE_DELAY) return;
-    
+
     lastTypingEmitRef.current = now;
     socket.emit("typing:start", {
       channelId,
@@ -97,7 +99,7 @@ export const ChatInput = ({ apiUrl, query, name, type, channelId, userId, userNa
   const handleInputChange = useCallback(
     (value: string, onChange: (value: string) => void) => {
       onChange(value);
-      
+
       // Only emit typing if there's actual content
       if (value.trim().length > 0) {
         emitTypingEvent();
@@ -122,13 +124,13 @@ export const ChatInput = ({ apiUrl, query, name, type, channelId, userId, userNa
         url: apiUrl,
         query,
       });
-      
+
       // Reset form ngay để UX tốt hơn
       form.reset();
-      
+
       // Gửi tin nhắn
       await axios.post(url, values);
-      
+
       // Check toxic trong background (không block)
       checkToxicAsync(values.content).then(({ toxicity, spam }) => {
         if (toxicity > 0.7 || spam > 0.7) {
@@ -160,16 +162,14 @@ export const ChatInput = ({ apiUrl, query, name, type, channelId, userId, userNa
                   </button>
                   <Input
                     disabled={isLoading}
-                    placeholder={`Message ${
-                      type === "conversation" ? name : "#" + name
-                    }`}
+                    placeholder={type === "conversation" ? t("messagePlaceholder", { name }) : t("messageChannelPlaceholder", { name })}
                     {...field}
                     onChange={(e) => handleInputChange(e.target.value, field.onChange)}
                     className="pl-14 pr-24 py-6 bg-zinc-200/90 dark:bg-zinc-700/75 border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
                   />
                   <div className="absolute top-1/2 -translate-y-1/2 right-8 flex items-center gap-2">
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => onOpen("payment")}
                       className="hover:opacity-75 transition"
                     >

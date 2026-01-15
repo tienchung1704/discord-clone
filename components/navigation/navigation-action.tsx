@@ -5,9 +5,12 @@ import { ActionTooltip } from "../ui/action-tooltip";
 import { useModal } from "../hooks/user-model-store";
 import Image from "next/image";
 import discordPng from "@/public/discord.png"
+import { useTranslations } from "next-intl";
 
 export const NavigationAction = () => {
     const { onOpen } = useModal();
+    const t = useTranslations("Navigation");
+
     return (
         <div>
             {/*           <div>
@@ -27,7 +30,7 @@ export const NavigationAction = () => {
                 <ActionTooltip
                     side="right"
                     align="center"
-                    label="Add new server"
+                    label={t("addServer")}
                 >
                     <button onClick={() => onOpen("createServer")} className="group flex items-center">
                         <div className="flex mx-3 h-[48px] w-[48px] rounded-[24px] group-hover:rounded-[16px] transition-all overflow-hidden items-center justify-center bg-background dark:bg-neutral-800 group-hover:bg-emerald-500">

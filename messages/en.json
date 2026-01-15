@@ -1,0 +1,94 @@
+{
+    "Sidebar": {
+        "findOrStart": "Find or start a conversation",
+        "directMessages": "Direct Messages",
+        "createDM": "Create DM"
+    },
+    "Common": {
+        "loading": "Loading...",
+        "save": "Save",
+        "cancel": "Cancel",
+        "create": "Create",
+        "delete": "Delete",
+        "edit": "Edit",
+        "close": "Close",
+        "search": "Search",
+        "noResults": "No results found",
+        "confirm": "Confirm",
+        "copied": "Copied!"
+    },
+    "CreateDM": {
+        "title": "Select Friends",
+        "subTitle": "You can add 9 more friends.",
+        "placeholder": "Type the username of a friend",
+        "notFound": "No friends found.",
+        "submit": "Create DM"
+    },
+    "MobileToggle": {
+        "menu": "Menu"
+    },
+    "Chat": {
+        "welcomeChannel": "Welcome to #{name}",
+        "welcomeConversation": "{name}",
+        "channelStart": "This is the start of the #{name} channel.",
+        "conversationStart": "This is the start of your conversation with {name}",
+        "messagePlaceholder": "Message {name}",
+        "messageChannelPlaceholder": "Message #{name}",
+        "textChannels": "Text Channels",
+        "voiceChannels": "Voice Channels",
+        "videoChannels": "Video Channels",
+        "members": "Members",
+        "startVideoCall": "Start video call",
+        "endVideoCall": "End video call",
+        "searchMessages": "Search messages",
+        "pinnedMessages": "Pinned messages",
+        "noPinnedMessages": "No pinned messages",
+        "toggleSidebar": "Toggle sidebar"
+    },
+    "Language": {
+        "language": "Language"
+    },
+    "Server": {
+        "createTitle": "Create Your Server",
+        "createDescription": "Your server is where you and your friends hang out. Make yours and start talking.",
+        "createMyOwn": "Create My Own",
+        "createCommunity": "Create for a Community",
+        "joinServer": "Join a Server",
+        "deleteTitle": "Delete Server",
+        "deleteConfirm": "Are you sure you want to delete {name}? This action cannot be undone.",
+        "deleteButton": "Delete Server",
+        "leaveTitle": "Leave Server",
+        "leaveConfirm": "Are you sure you want to leave {name}? You won't be able to rejoin unless you're invited again.",
+        "leaveButton": "Leave Server",
+        "inviteTitle": "Invite Friends",
+        "inviteDescription": "Share this link with others to grant access to {name}",
+        "inviteLink": "Server Invite Link",
+        "generateLink": "Generate a new link",
+        "serverName": "Server Name",
+        "serverNamePlaceholder": "Enter server name",
+        "addServer": "Add a server"
+    },
+    "Channel": {
+        "createTitle": "Create Channel",
+        "editTitle": "Edit Channel",
+        "deleteTitle": "Delete Channel",
+        "deleteConfirm": "Are you sure you want to delete #{name}? This action cannot be undone.",
+        "channelName": "Channel Name",
+        "channelType": "Channel Type",
+        "text": "Text",
+        "audio": "Audio",
+        "video": "Video"
+    },
+    "Members": {
+        "title": "Manage Members",
+        "memberCount": "{count} Members",
+        "kick": "Kick",
+        "guest": "Guest",
+        "moderator": "Moderator",
+        "admin": "Admin"
+    },
+    "Navigation": {
+        "addServer": "Add a server",
+        "directMessages": "Direct Messages"
+    }
+}
