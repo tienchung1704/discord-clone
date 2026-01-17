@@ -7,8 +7,6 @@ import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 
-// Lazy load emoji-mart components to reduce initial bundle size
-// Requirements: 12.2 - WHEN loading emoji picker THEN the Discord_Clone SHALL lazy load the emoji-mart library
 const Picker = dynamic(
     () => import("@emoji-mart/react").then((mod) => mod.default),
     {
