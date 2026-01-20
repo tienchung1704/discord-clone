@@ -19,6 +19,7 @@ export function ModeToggle() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
+          suppressHydrationWarning
           className={cn(
             "flex items-center justify-center h-[40px] w-[40px] rounded-full transition-all",
             "bg-zinc-700 hover:bg-zinc-600",
@@ -31,7 +32,7 @@ export function ModeToggle() {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent side="right" align="center" className="w-36">
-        <DropdownMenuItem 
+        <DropdownMenuItem
           onClick={() => setTheme("light")}
           className={cn("flex items-center gap-2 cursor-pointer", theme === "light" && "bg-zinc-100 dark:bg-zinc-800")}
         >
@@ -39,7 +40,7 @@ export function ModeToggle() {
           <span>Light</span>
           {theme === "light" && <span className="ml-auto text-xs text-zinc-500">✓</span>}
         </DropdownMenuItem>
-        <DropdownMenuItem 
+        <DropdownMenuItem
           onClick={() => setTheme("dark")}
           className={cn("flex items-center gap-2 cursor-pointer", theme === "dark" && "bg-zinc-100 dark:bg-zinc-800")}
         >
@@ -47,7 +48,7 @@ export function ModeToggle() {
           <span>Dark</span>
           {theme === "dark" && <span className="ml-auto text-xs text-zinc-500">✓</span>}
         </DropdownMenuItem>
-        <DropdownMenuItem 
+        <DropdownMenuItem
           onClick={() => setTheme("system")}
           className={cn("flex items-center gap-2 cursor-pointer", theme === "system" && "bg-zinc-100 dark:bg-zinc-800")}
         >

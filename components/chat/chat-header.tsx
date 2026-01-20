@@ -109,10 +109,10 @@ export const ChatHeader = async ({ serverId, channelId, name, type, imgUrl }: Ch
                             label: "Members",
                             type: "member",
                             data:
-                                members?.map((members) => ({
-                                    id: members.id,
-                                    name: profile.name,
-                                    icon: roleIconMap[members.role],
+                                members?.map((member) => ({
+                                    id: member.profileId,
+                                    name: member.profile.name,
+                                    icon: roleIconMap[member.role],
                                 }))
                         }
 
