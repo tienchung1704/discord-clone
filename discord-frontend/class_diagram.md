@@ -1,185 +1,240 @@
-# Detailed Class Diagram (Discord Clone)
+# Class Diagram
 
-This diagram follows the detailed UML style (Attributes + Methods) based on the project's logic and data structure.
+This diagram acts as a visual representation of the Prisma schema.
 
 ```mermaid
 classDiagram
-    direction TB
-    
-    %% User & Profile System
-    class Profile {
-        - id: String {PK}
-        - userId: String {unique}
-        - name: String
-        - email: String
-        - imageUrl: String
-        - isPremium: Boolean
-        - status: UserStatus
-        - lastSeen: DateTime
-        - createdAt: DateTime
-        - updatedAt: DateTime
-        + updateProfile(data: ProfileData): void
-        + setStatus(status: UserStatus): void
-        + createServer(name: String): Server
-        + joinServer(inviteCode: String): Member
-        + addHobby(hobbyId: String): void
+    %% Enums
+    class HobbyType {
+        <<enumeration>>
+        GAMING
+        MUSIC
+        PROGRAMMING
+        MOVIES
+        SPORTS
+        ANIME
+        BOOKS
+        TECHNOLOGY
+        TRAVEL
+        FOOD
     }
 
+    class UserStatus {
+        <<enumeration>>
+        ONLINE
+        IDLE
+        DND
+        OFFLINE
+    }
+
+    class MemberRole {
+        <<enumeration>>
+        ADMIN
+        GUEST
+        MODERATOR
+    }
+
+    class ChannelType {
+        <<enumeration>>
+        TEXT
+        AUDIO
+        VIDEO
+    }
+
+    %% Models
     class Hobby {
-        - id: String {PK}
-        - type: HobbyType
-        + getProfiles(): Profile[]
+        +id: String
+        +type: HobbyType
     }
-    
+
     class ProfileHobby {
-        - id: String {PK}
-        - profileId: String {FK}
-        - hobbyId: String {FK}
+        +id: String
+        +profileId: String
+        +hobbyId: String
     }
 
-    %% Server System
+    class Profile {
+        +id: String
+        +userId: String
+        +name: String
+        +isPremium: Boolean
+        +status: UserStatus
+        +lastSeen: DateTime
+        +imageUrl: String
+        +email: String
+        +createdAt: DateTime
+        +updatedAt: DateTime
+    }
+
     class Server {
-        - id: String {PK}
-        - name: String
-        - imageUrl: String
-        - inviteCode: String {unique}
-        - profileId: String {FK}
-        - isPublic: Boolean
-        - hobby: String?
-        - createdAt: DateTime
-        - updatedAt: DateTime
-        + updateServer(data: ServerData): void
-        + deleteServer(): void
-        + generateInvite(): String
-        + getMembers(): Member[]
-        + getChannels(): Channel[]
-    }
-
-    class Member {
-        - id: String {PK}
-        - role: MemberRole
-        - profileId: String {FK}
-        - serverId: String {FK}
-        - createdAt: DateTime
-        - updatedAt: DateTime
-        + updateRole(role: MemberRole): void
-        + kick(): void
-        + ban(): void
-        + sendDirectMessage(content: String): Message
+        +id: String
+        +name: String
+        +imageUrl: String
+        +inviteCode: String
+        +profileId: String
+        +hobby: String?
+        +isPublic: Boolean
+        +createdAt: DateTime
+        +updatedAt: DateTime
     }
 
     class CustomRole {
-        - id: String {PK}
-        - name: String
-        - color: String
-        - position: Int
-        - serverId: String {FK}
-        + assignTo(memberId: String): void
-        + removeFrom(memberId: String): void
+        +id: String
+        +name: String
+        +color: String
+        +position: Int
+        +serverId: String
+        +createdAt: DateTime
+        +updatedAt: DateTime
     }
 
-    %% Channel & Chat System
+    class MemberCustomRole {
+        +id: String
+        +memberId: String
+        +customRoleId: String
+        +assignedAt: DateTime
+    }
+
+    class Member {
+        +id: String
+        +role: MemberRole
+        +profileId: String
+        +serverId: String
+        +createdAt: DateTime
+        +updatedAt: DateTime
+    }
+
     class Channel {
-        - id: String {PK}
-        - name: String
-        - type: ChannelType
-        - profileId: String {FK}
-        - serverId: String {FK}
-        - createdAt: DateTime
-        - updatedAt: DateTime
-        + sendMessage(content: String, fileUrl: String?): Message
-        + deleteChannel(): void
-        + updateChannel(name: String, type: ChannelType): void
+        +id: String
+        +name: String
+        +type: ChannelType
+        +profileId: String
+        +serverId: String
+        +createdAt: DateTime
+        +updatedAt: DateTime
     }
 
     class Message {
-        - id: String {PK}
-        - content: String {Text}
-        - fileUrl: String?
-        - memberId: String {FK}
-        - channelId: String {FK}
-        - deleted: Boolean
-        - createdAt: DateTime
-        - updatedAt: DateTime
-        + edit(content: String): void
-        + delete(): void
-        + pin(): void
-        + addReaction(emoji: String): void
+        +id: String
+        +content: String
+        +fileUrl: String?
+        +memberId: String
+        +channelId: String
+        +deleted: Boolean
+        +createdAt: DateTime
+        +updatedAt: DateTime
     }
 
     class Reaction {
-        - id: String {PK}
-        - emoji: String
-        - messageId: String {FK}
-        - memberId: String {FK}
-        - createdAt: DateTime
+        +id: String
+        +emoji: String
+        +messageId: String
+        +memberId: String
+        +createdAt: DateTime
     }
 
-    class PinnedMessage {
-        - id: String {PK}
-        - messageId: String {FK}
-        - channelId: String {FK}
-        - pinnedById: String {FK}
-        + unpin(): void
-    }
-
-    %% Direct Messaging System
     class GlobalConversation {
-        - id: String {PK}
-        - profileOneId: String {FK}
-        - profileTwoId: String {FK}
-        - createdAt: DateTime
-        + getMessages(): GlobalDirectMessage[]
+        +id: String
+        +profileOneId: String
+        +profileTwoId: String
+        +createdAt: DateTime
+        +updatedAt: DateTime
     }
 
     class GlobalDirectMessage {
-        - id: String {PK}
-        - content: String
-        - fileUrl: String?
-        - profileId: String {FK}
-        - conversationId: String {FK}
-        - deleted: Boolean
-        + edit(content: String): void
-        + delete(): void
+        +id: String
+        +content: String
+        +fileUrl: String?
+        +profileId: String
+        +conversationId: String
+        +deleted: Boolean
+        +createdAt: DateTime
+        +updatedAt: DateTime
     }
+
+    class Conversation {
+        +id: String
+        +memberOneId: String
+        +memberTwoId: String
+    }
+
+    class DirectMessage {
+        +id: String
+        +content: String
+        +fileUrl: String?
+        +memberId: String
+        +conversationId: String
+        +createdAt: DateTime
+        +updatedAt: DateTime
+        +deleted: Boolean
+    }
+
+    class ChannelMember {
+        +id: String
+        +channelId: String
+        +memberId: String
+        +joinedAt: DateTime
+    }
+
+    class ChannelReadState {
+        +id: String
+        +channelId: String
+        +profileId: String
+        +lastReadMessageId: String?
+        +lastReadAt: DateTime
+    }
+
+    class PinnedMessage {
+        +id: String
+        +messageId: String
+        +channelId: String
+        +pinnedById: String
+        +pinnedAt: DateTime
+    }
+
+    %% Relationships
+    Hobby "1" -- "*" ProfileHobby : has
+    Profile "1" -- "*" ProfileHobby : has
+
+    Profile "1" -- "*" Server : creates
+    Server "1" -- "*" Member : contains
+    Server "1" -- "*" Channel : contains
+    Server "1" -- "*" CustomRole : has
+
+    CustomRole "1" -- "*" MemberCustomRole : assigned_to
+    Member "1" -- "*" MemberCustomRole : has_role
+
+    Profile "1" -- "*" Member : is_profile_of
     
-    %% Relationships with Cardinality
+    Member "1" -- "*" Message : sends
+    Channel "1" -- "*" Message : contains
+
+    Message "1" -- "*" Reaction : has
+    Member "1" -- "*" Reaction : reacts
+
+    Channel "1" -- "*" ChannelMember : includes
+    Member "1" -- "*" ChannelMember : joins
+
+    Profile "1" -- "*" GlobalConversation : initiates
+    Profile "1" -- "*" GlobalConversation : receives
+    GlobalConversation "1" -- "*" GlobalDirectMessage : contains
+    Profile "1" -- "*" GlobalDirectMessage : sends
+
+    Member "1" -- "*" Conversation : initiates
+    Member "1" -- "*" Conversation : receives
+    Conversation "1" -- "*" DirectMessage : contains
+    Member "1" -- "*" DirectMessage : sends
+
+    Channel "1" -- "*" ChannelReadState : tracked_in
+    Profile "1" -- "*" ChannelReadState : reads
+
+    Message "1" -- "1" PinnedMessage : pinned
+    Channel "1" -- "*" PinnedMessage : contains_pinned
+    Member "1" -- "*" PinnedMessage : pinned_by
     
-    Profile "1" --> "0..*" Server : owns
-    Profile "1" --> "0..*" ProfileHobby : has
-    Hobby "1" --> "0..*" ProfileHobby : includes
-    
-    Server "1" *-- "0..*" Channel : contains
-    Server "1" *-- "0..*" Member : has members
-    Server "1" *-- "0..*" CustomRole : defines roles
-    
-    Profile "1" -- "0..*" Member : identity for
-    
-    Member "0..*" --> "0..*" CustomRole : assigned roles
-    
-    Channel "1" *-- "0..*" Message : stream
-    Member "1" --> "0..*" Message : posts
-    
-    Message "1" *-- "0..*" Reaction : has
-    Member "1" --> "0..*" Reaction : reacts
-    
-    Message "1" -- "0..1" PinnedMessage : can be
-    
-    %% DM Relations
-    Profile "1" --> "0..*" GlobalConversation : participates
-    GlobalConversation "1" *-- "0..*" GlobalDirectMessage : history
+    %% Enum usage
+    Hobby .. HobbyType
+    Profile .. UserStatus
+    Member .. MemberRole
+    Channel .. ChannelType
 ```
-
-## Data Types
-
-### Enums
-*   **UserStatus**: `ONLINE`, `IDLE`, `DND`, `OFFLINE`
-*   **MemberRole**: `ADMIN`, `MODERATOR`, `GUEST`
-*   **ChannelType**: `TEXT`, `AUDIO`, `VIDEO`
-*   **HobbyType**: `GAMING`, `MUSIC`, `PROGRAMMING`, `MOVIES`, `ANIME`, `BOOKS`, `TECHNOLOGY`, `SPORTS`, `TRAVEL`, `FOOD`
-
-### Notes
-*   `{PK}`: Primary Key
-*   `{FK}`: Foreign Key
-*   `{unique}`: Unique Constraint
-*   Methods (e.g., `updateProfile`, `sendMessage`) are inferred from typical application logic, as Prisma schemas do not define behavior.
