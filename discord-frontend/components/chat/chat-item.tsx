@@ -16,6 +16,7 @@ import {
   ShieldAlert,
   ShieldCheck,
   Trash,
+  Mic,
 } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
@@ -25,6 +26,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useModal } from "../hooks/user-model-store";
 import { MessageReactions, ReactionButton } from "./message-reactions";
+import { useVoiceState } from "@/components/providers/voice-state-provider";
 
 
 interface CustomRoleData {
@@ -96,6 +98,7 @@ const ChatItemBase = ({
   const [pinned, setPinned] = useState(isPinned);
   const [isPinLoading, setIsPinLoading] = useState(false);
   const { onOpen } = useModal();
+  const { voiceState, speakMessage } = useVoiceState();
 
   const params = useParams();
   const router = useRouter();
@@ -321,6 +324,14 @@ const ChatItemBase = ({
             socketUrl={socketUrl}
             socketQuery={socketQuery}
           />
+          {isOwner && voiceState.isConnected && (
+            <ActionTooltip label="Speak">
+              <Mic
+                onClick={() => speakMessage(content)}
+                className="cursor-pointer ml-auto w-4 h-4 text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition"
+              />
+            </ActionTooltip>
+          )}
           {canPinMessage && (
             <ActionTooltip label={pinned ? "Unpin message" : "Pin message"}>
               {pinned ? (

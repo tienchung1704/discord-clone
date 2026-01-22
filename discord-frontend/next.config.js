@@ -59,6 +59,15 @@ const nextConfig = {
 
   // Tối ưu headers
   poweredByHeader: false,
+
+  async rewrites() {
+    return [
+      {
+        source: "/api/tts",
+        destination: "http://localhost:8000/tts",
+      },
+    ];
+  },
 };
 
 const withBundleAnalyzer = require('@next/bundle-analyzer')({

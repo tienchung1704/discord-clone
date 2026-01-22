@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, ReactNode, useEffect, useRef } from "react";
+import { createContext, useContext, useState, useCallback, ReactNode, useEffect, useRef, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 import { useSocket } from "@/components/providers/socket-provider";
@@ -32,6 +32,46 @@ const RoomAudioRenderer = dynamic(
   { ssr: false }
 );
 
+// Import hook dynamically or statically? Statically is safer for hooks.
+import { useLocalParticipant } from "@livekit/components-react";
+
+const TTSPlayer = ({ audioBlob, onComplete }: { audioBlob: Blob | null, onComplete: () => void }) => {
+  const { localParticipant } = useLocalParticipant();
+
+  useEffect(() => {
+    if (!audioBlob || !localParticipant) return;
+
+    const play = async () => {
+      try {
+        const arrayBuffer = await audioBlob.arrayBuffer();
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+
+        const dest = ctx.createMediaStreamDestination();
+        const source = ctx.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(dest);
+        source.connect(ctx.destination); // Local monitor
+        source.start();
+
+        const track = dest.stream.getAudioTracks()[0];
+        const sender = await localParticipant.publishTrack(track, { name: "tts_audio" });
+
+        source.onended = async () => {
+          if (sender) await localParticipant.unpublishTrack(track);
+          onComplete();
+        };
+      } catch (error) {
+        console.error("TTS Playback error:", error);
+        onComplete();
+      }
+    };
+    play();
+  }, [audioBlob, localParticipant, onComplete]);
+
+  return null;
+};
+
 interface VoiceState {
   isConnected: boolean;
   channelId: string | null;
@@ -59,6 +99,7 @@ interface VoiceStateContextType {
   }) => void;
   leaveVoice: () => void;
   isInVoiceChannel: (channelId: string) => boolean;
+  speakMessage: (text: string) => Promise<void>;
 }
 
 const defaultState: VoiceState = {
@@ -76,23 +117,28 @@ const defaultState: VoiceState = {
 
 const VoiceStateContext = createContext<VoiceStateContextType>({
   voiceState: defaultState,
-  joinVoice: () => {},
-  leaveVoice: () => {},
+  joinVoice: () => { },
+  leaveVoice: () => { },
   isInVoiceChannel: () => false,
+  speakMessage: async () => { },
 });
 
 export const useVoiceState = () => useContext(VoiceStateContext);
 
 
 // Persistent LiveKit Room - single instance that stays connected
-const PersistentLiveKitRoom = ({ 
-  voiceState, 
+const PersistentLiveKitRoom = ({
+  voiceState,
   onDisconnect,
-  isViewingVoiceChannel
-}: { 
+  isViewingVoiceChannel,
+  audioBlob,
+  onAudioComplete
+}: {
   voiceState: VoiceState;
   onDisconnect: () => void;
   isViewingVoiceChannel: boolean;
+  audioBlob: Blob | null;
+  onAudioComplete: () => void;
 }) => {
   const [stylesLoaded, setStylesLoaded] = useState(false);
 
@@ -116,11 +162,11 @@ const PersistentLiveKitRoom = ({
 
   // Single LiveKitRoom instance - position changes based on viewing state
   return (
-    <div 
+    <div
       className={cn(
         "fixed z-40 bg-[#313338]",
-        isViewingVoiceChannel 
-          ? "visible opacity-100" 
+        isViewingVoiceChannel
+          ? "visible opacity-100"
           : "invisible opacity-0 pointer-events-none"
       )}
       style={isViewingVoiceChannel ? {
@@ -144,8 +190,10 @@ const PersistentLiveKitRoom = ({
         onDisconnected={onDisconnect}
         className="h-full w-full"
       >
+
         <RoomAudioRenderer />
         <VideoConference />
+        <TTSPlayer audioBlob={audioBlob} onComplete={onAudioComplete} />
       </LiveKitRoom>
     </div>
   );
@@ -153,6 +201,7 @@ const PersistentLiveKitRoom = ({
 
 export const VoiceStateProvider = ({ children }: { children: ReactNode }) => {
   const [voiceState, setVoiceState] = useState<VoiceState>(defaultState);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const { socket } = useSocket();
   const params = useParams();
   const hasEmittedJoin = useRef(false);
@@ -171,7 +220,7 @@ export const VoiceStateProvider = ({ children }: { children: ReactNode }) => {
     profileImageUrl: string;
   }) => {
     hasEmittedJoin.current = false;
-    
+
     const sanitizedName = joinParams.profileName
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
@@ -183,7 +232,7 @@ export const VoiceStateProvider = ({ children }: { children: ReactNode }) => {
         `/api/token?room=${joinParams.channelId}&username=${encodeURIComponent(sanitizedName)}`
       );
       const data = await resp.json();
-      
+
       setVoiceState({
         isConnected: true,
         ...joinParams,
@@ -210,20 +259,26 @@ export const VoiceStateProvider = ({ children }: { children: ReactNode }) => {
     return voiceState.isConnected && voiceState.channelId === channelId;
   }, [voiceState]);
 
+  const speakMessage = useCallback(async (text: string) => {
+    if (!voiceState.isConnected) return;
+    try {
+      const resp = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (!resp.ok) throw new Error("TTS Request failed");
+      const blob = await resp.blob();
+      setAudioBlob(blob);
+    } catch (error) {
+      console.error("TTS Error:", error);
+    }
+  }, [voiceState.isConnected]);
+
   // Socket events for voice participants
   useEffect(() => {
-    console.log("[VoiceState] Effect:", { 
-      hasSocket: !!socket, 
-      socketConnected: socket?.connected,
-      isConnected: voiceState.isConnected, 
-      serverId: voiceState.serverId, 
-      hasToken: !!voiceState.token, 
-      hasEmittedJoin: hasEmittedJoin.current 
-    });
-
     if (!socket || !voiceState.isConnected || !voiceState.serverId || !voiceState.token || hasEmittedJoin.current) return;
 
-    console.log("[VoiceState] Emitting voice:join-server", voiceState.serverId);
     socket.emit("voice:join-server", voiceState.serverId);
 
     const participant = {
@@ -234,7 +289,6 @@ export const VoiceStateProvider = ({ children }: { children: ReactNode }) => {
     };
 
     setTimeout(() => {
-      console.log("[VoiceState] Emitting voice:join-channel", { serverId: voiceState.serverId, channelId: voiceState.channelId });
       socket.emit("voice:join-channel", {
         serverId: voiceState.serverId,
         channelId: voiceState.channelId,
@@ -244,14 +298,20 @@ export const VoiceStateProvider = ({ children }: { children: ReactNode }) => {
     }, 100);
   }, [socket, voiceState]);
 
+  const contextValue = useMemo(() => ({
+    voiceState, joinVoice, leaveVoice, isInVoiceChannel, speakMessage
+  }), [voiceState, joinVoice, leaveVoice, isInVoiceChannel, speakMessage]);
+
   return (
-    <VoiceStateContext.Provider value={{ voiceState, joinVoice, leaveVoice, isInVoiceChannel }}>
+    <VoiceStateContext.Provider value={contextValue}>
       {children}
       {voiceState.isConnected && voiceState.token && (
-        <PersistentLiveKitRoom 
+        <PersistentLiveKitRoom
           voiceState={voiceState}
           onDisconnect={leaveVoice}
           isViewingVoiceChannel={isViewingVoiceChannel}
+          audioBlob={audioBlob}
+          onAudioComplete={() => setAudioBlob(null)}
         />
       )}
     </VoiceStateContext.Provider>
